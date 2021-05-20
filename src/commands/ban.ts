@@ -7,10 +7,10 @@ const command: app.Command<app.GuildMessage> = {
   middlewares: [app.modOnly],
   positional: [
     {
-      required: true,
       name: "target",
       castValue: "member",
       description: "Member to ban",
+      required: true,
     },
     {
       name: "reason",
