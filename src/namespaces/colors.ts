@@ -1,0 +1,9 @@
+export const NEUTRAL = 0xffffff
+export const ALERT = 0xf44242
+export const WARNING = 0xffac00
+export const VALID = 0x5ab244
+export const NEUTRAL_BLUE = 0x21b1ff
+export const SHOP = 0x00f33f
+export const SDVR = 0xff6b3e
+export const DOWNLOAD = 0x00eaa1
+export const MODERATOR = 0xffdb00

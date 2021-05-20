@@ -1,4 +1,5 @@
 import Discord from "discord.js"
+import * as command from "../app/command"
 
 import guilds from "../tables/guilds.native"
 
@@ -14,4 +15,11 @@ export async function prefix(guild?: Discord.Guild): Promise<string> {
     }
   }
   return prefix
+}
+
+export const modOnly: command.Middleware<command.GuildMessage> = (message) => {
+  return (
+    message.member.roles.cache.some((role) => role.name === "Modérateur") ||
+    "You must be a moderator!"
+  )
 }
