@@ -7,6 +7,7 @@ import has_item from "../tables/has_item"
 const command: app.Command<app.GuildMessage> = {
   name: "buy",
   description: "Buy article",
+  guildChannelOnly: true,
   positional: [
     {
       name: "choice",

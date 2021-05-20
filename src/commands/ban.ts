@@ -3,6 +3,7 @@ import * as app from "../app"
 const command: app.Command<app.GuildMessage> = {
   name: "ban",
   description: "Ban a member",
+  guildChannelOnly: true,
   middlewares: [app.modOnly],
   positional: [
     {
