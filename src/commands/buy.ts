@@ -12,6 +12,7 @@ const command: app.Command<app.GuildMessage> = {
       name: "choice",
       description: "Index of article",
       castValue: "number",
+      required: true,
     },
   ],
   async run(message) {
