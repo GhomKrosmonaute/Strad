@@ -24,7 +24,7 @@ const command: app.Command<app.GuildMessage> = {
 
     const user = await users.query
       .select()
-      .where("user_id", message.author.id)
+      .where("id", message.author.id)
       .first()
 
     if (!user)
@@ -68,8 +68,7 @@ const command: app.Command<app.GuildMessage> = {
           last_daily: todayDate,
           crea_amount: user.crea_amount + finalCreaReward,
         })
-        .where("user_id", message.author.id)
-      ;`UPDATE users SET money = money + ${finalBlockReward}, creas_amount = creas_amount + ${finalCreaReward}, usertag = "${message.member.displayName}" WHERE user_id = "${message.author.id}"`
+        .where("id", message.author.id)
 
       return channel.send(
         new app.MessageEmbed()
