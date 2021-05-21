@@ -1,8 +1,8 @@
 import * as app from "../app"
 
 export const emojiList = {
-  BLOCK: "547449530610745364",
-  CREA: "547482886824001539>",
+  BLOCK: "708605242148651009",
+  CREA: "547482886824001539",
   UPVOTE: "622719358078156800",
   DOWNVOTE: "622719341707788296",
   REPORT: "418441210475053056",
@@ -16,6 +16,11 @@ export const emojiList = {
 
 export type EmojiName = keyof typeof emojiList
 
-export function emoji(client: app.Client, emojiName: EmojiName) {
-  return client.emojis.cache.get(emojiList[emojiName])
+export function emoji(
+  client: app.Client,
+  emojiName: EmojiName
+): app.GuildEmoji {
+  const emoji = client.emojis.cache.get(emojiList[emojiName])
+  if (!emoji) throw new Error(`The ${emojiName} emoji not longer exists.`)
+  return emoji
 }
