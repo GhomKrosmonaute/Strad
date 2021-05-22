@@ -2,7 +2,7 @@ import * as app from "../app"
 
 const table = new app.Table<{
   key_face: string
-  key_value: string
+  key_value: number
   key_print: string
   creator_id: string
   redeem_date: string
@@ -11,8 +11,8 @@ const table = new app.Table<{
 }>({
   name: "blocks_keys",
   setup: (table) => {
+    table.integer("key_value")
     table.string("key_face")
-    table.string("key_value")
     table.string("key_print").unique()
     table.string("creator_id")
     table.string("redeem_date")
