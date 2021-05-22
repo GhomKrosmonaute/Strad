@@ -2,7 +2,7 @@ import * as app from "../app"
 
 const command: app.Command<app.GuildMessage> = {
   name: "kick",
-  description: "Kick a member",
+  description: "Kick member",
   guildChannelOnly: true,
   middlewares: [app.modOnly],
   positional: [

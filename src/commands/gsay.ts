@@ -2,7 +2,7 @@ import * as app from "../app"
 
 const command: app.Command<app.GuildMessage> = {
   name: "gsay",
-  description: "Send a message in specific channel",
+  description: "Send message in specific channel",
   guildChannelOnly: true,
   middlewares: [app.mentorOnly],
   rest: {

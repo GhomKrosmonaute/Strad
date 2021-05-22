@@ -5,7 +5,7 @@ import blocks_keys from "../tables/blocks_keys"
 
 const command: app.Command<app.GuildMessage> = {
   name: "key",
-  description: "Create a key",
+  description: "Create key",
   positional: [
     {
       name: "value",
