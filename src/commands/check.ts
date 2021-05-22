@@ -4,7 +4,7 @@ import blocks_keys from "../tables/blocks_keys"
 
 const command: app.Command<app.GuildMessage> = {
   name: "check",
-  description: "",
+  description: "Check key validity",
   guildChannelOnly: true,
   positional: [
     {
