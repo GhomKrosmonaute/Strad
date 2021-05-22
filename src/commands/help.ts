@@ -114,7 +114,7 @@ const command: app.Command<app.GuildMessage> = {
             .setColor(app.NEUTRAL_BLUE)
         )
 
-        if (message.member.roles.cache.has(app.moderatorRole)) {
+        if (message.member.roles.cache.has(app.modRole)) {
           return message.author.send(
             new app.MessageEmbed()
               .setTitle("Help (suite)")

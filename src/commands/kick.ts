@@ -9,13 +9,14 @@ const command: app.Command<app.GuildMessage> = {
     {
       name: "target",
       castValue: "member",
-      description: "Member to ban",
+      description: "Member to kick",
       required: true,
     },
     {
       name: "reason",
-      description: "Reason of ban",
+      description: "Reason of kick",
       checkValue: (value) => value.length > 10,
+      required: true,
     },
   ],
   async run(message) {

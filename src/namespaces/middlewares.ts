@@ -3,8 +3,7 @@ import * as strad from "./strad"
 
 export const modOnly: command.Middleware<command.GuildMessage> = (message) => {
   return (
-    message.member.roles.cache.has(strad.moderatorRole) ||
-    "You must be a moderator!"
+    message.member.roles.cache.has(strad.modRole) || "You must be a moderator!"
   )
 }
 

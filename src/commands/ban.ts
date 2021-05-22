@@ -16,6 +16,7 @@ const command: app.Command<app.GuildMessage> = {
       name: "reason",
       description: "Reason of ban",
       checkValue: (value) => value.length > 10,
+      required: true,
     },
   ],
   async run(message) {
