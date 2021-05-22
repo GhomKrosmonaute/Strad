@@ -65,9 +65,7 @@ const command: app.Command<app.GuildMessage> = {
           (reaction, user) => user.id === message.author.id
         )
       } else {
-        const channel = message.client.channels.cache.get(app.commandChannel)
-
-        if (!channel?.isText()) return
+        const channel = app.getCommandChannel(message)
 
         await channel.send(
           new app.MessageEmbed()

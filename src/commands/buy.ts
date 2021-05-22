@@ -21,9 +21,7 @@ const command: app.Command<app.GuildMessage> = {
 
     const BLOCK = app.emoji(message.client, "BLOCK")
 
-    const channel = message.client.channels.cache.get(app.commandChannel)
-
-    if (!channel?.isText()) return
+    const channel = app.getCommandChannel(message)
 
     const result = await users.query
       .select("money")

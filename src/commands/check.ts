@@ -20,9 +20,7 @@ const command: app.Command<app.GuildMessage> = {
     const KEY_VALID = app.emoji(message.client, "KEY_VALID")
     const KEY_USED = app.emoji(message.client, "KEY_USED")
 
-    const channel = message.client.channels.cache.get(app.commandChannel)
-
-    if (!channel?.isText()) return
+    const channel = app.getCommandChannel(message)
 
     const key = await blocks_keys.query
       .select()
@@ -62,8 +60,7 @@ const command: app.Command<app.GuildMessage> = {
         new app.MessageEmbed()
           .setTitle("Clé introuvable")
           .setDescription(
-            `L'empreinte \`${message.args.key}\` n'est liée à aucune clé existante.
-          Format : \`XX-XXXX\`.`
+            `L'empreinte \`${message.args.key}\` n'est liée à aucune clé existante.\nFormat : \`XX-XXXX\`.`
           )
           .setColor(app.ALERT)
       )

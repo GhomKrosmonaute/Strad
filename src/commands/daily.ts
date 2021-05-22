@@ -16,9 +16,7 @@ const command: app.Command<app.GuildMessage> = {
     const DOWNVOTE = app.emoji(message.client, "DOWNVOTE")
     const DOWNLOAD = app.emoji(message.client, "DOWNLOAD")
 
-    const channel = message.client.channels.cache.get(app.commandChannel)
-
-    if (!channel?.isText()) return
+    const channel = app.getCommandChannel(message)
 
     const todayDate = app.dayjs().format("DD/MM/YY")
 
