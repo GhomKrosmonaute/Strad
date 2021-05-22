@@ -1,8 +1,8 @@
 import * as app from "../app"
 
 const command: app.Command<app.GuildMessage> = {
-  name: "ban",
-  description: "Ban a member",
+  name: "kick",
+  description: "Kick a member",
   guildChannelOnly: true,
   middlewares: [app.modOnly],
   positional: [
@@ -19,14 +19,14 @@ const command: app.Command<app.GuildMessage> = {
     },
   ],
   async run(message) {
-    await message.args.target.ban({
+    await message.args.target.kick({
       reason: message.args.reason,
     })
 
     const embed = new app.MessageEmbed()
-      .setTitle("Bannissement")
+      .setTitle("Expulsion")
       .setDescription(
-        `${message.args.target} a été banni de Stradivarius.\nRaison : "${message.args.reason}"`
+        `${message.args.target} a été expulsé de Stradivarius.\nRaison : "${message.args.reason}"`
       )
       .setColor(app.ALERT)
 
