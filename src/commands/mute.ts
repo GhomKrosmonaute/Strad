@@ -67,7 +67,7 @@ const command: app.Command<app.GuildMessage> = {
       .setColor(app.ALERT)
 
     await app.getLogChannel(message).send(embed)
-    await app.getCommandChannel(message).send(embed)
+    await app.sendThenDelete(app.getCommandChannel(message), embed)
 
     setTimeout(
       (member: app.GuildMember) => {

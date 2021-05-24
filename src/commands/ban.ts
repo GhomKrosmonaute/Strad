@@ -32,7 +32,7 @@ const command: app.Command<app.GuildMessage> = {
       .setColor(app.ALERT)
 
     await app.getLogChannel(message).send(embed)
-    return app.getCommandChannel(message).send(embed)
+    return app.sendThenDelete(app.getCommandChannel(message), embed)
   },
 }
 

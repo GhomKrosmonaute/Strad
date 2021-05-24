@@ -1,4 +1,5 @@
 import * as app from "../app"
+import discord from "discord.js"
 
 export function sendLog(
   client: app.Client,
@@ -9,14 +10,19 @@ export function sendLog(
   if (logChannel?.isText()) logChannel.send(embed)
 }
 
-export function sendEmbedThenDelete(
-  message: app.CommandMessage,
-  embed: app.MessageEmbed
+export async function sendThenDelete(
+  channel: discord.TextChannel | discord.DMChannel | discord.NewsChannel,
+  content: discord.MessageEmbed | string,
+  timeout = 5000
 ) {
-  message.channel.send(embed).then((message) => {
-    setTimeout(() => {
-      message.delete().catch()
-    }, 5000)
-  })
-  message.delete().catch()
+  return new Promise((resolve, reject) =>
+    channel
+      .send(content)
+      .then((message) => {
+        setTimeout(() => {
+          message.delete().then(resolve).catch(reject)
+        }, timeout)
+      })
+      .catch(reject)
+  )
 }
