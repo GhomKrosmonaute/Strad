@@ -3,6 +3,7 @@ import * as app from "../app"
 const table = new app.Table<{
   id: number
   name: string
+  emoji: string
   price: number
   discount: number
   quantity: number
@@ -14,6 +15,7 @@ const table = new app.Table<{
   setup: (table) => {
     table.increments("id").primary()
     table.string("name")
+    table.string("emoji")
     table.integer("price")
     table.integer("quantity")
     table.integer("discount")
