@@ -4,6 +4,7 @@ module.exports = new app.Command({
   name: "repo",
   description: "The repo command",
   channelType: "guild",
+  aliases: ["repos", "github", "git", "contribute"],
   async run(message) {
     const repos = {
       Nouveau: "https://github.com/CamilleAbella/Strad",
