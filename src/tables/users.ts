@@ -1,17 +1,20 @@
 import * as app from "../app"
 
-const table = new app.Table<{
+export interface User {
   id: string
+  tag: string
   rank: string
   money: number
-  user_tag: string
   last_daily: string
   crea_amount: number
-}>({
+}
+
+const table = new app.Table<User>({
   name: "users",
   priority: 5,
   setup: (table) => {
     table.string("id").index().unique()
+    table.string("tag")
     table.string("rank")
     table.integer("money").defaultTo(0)
     table.string("last_daily")
