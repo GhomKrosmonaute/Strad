@@ -9,6 +9,8 @@ const table = new app.Table<{
   quantity: number
   buy_amount: number
   is_buyable: boolean
+  is_saleable: boolean
+  description: string
 }>({
   name: "items",
   priority: 5,
@@ -21,6 +23,8 @@ const table = new app.Table<{
     table.integer("discount")
     table.integer("buy_amount")
     table.boolean("is_buyable").defaultTo(true)
+    table.boolean("is_saleable").defaultTo(true)
+    table.string("description")
   },
 })
 
