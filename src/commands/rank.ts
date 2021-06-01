@@ -11,12 +11,7 @@ module.exports = new app.Command({
     const BLOCK = app.emoji(message.client, "BLOCK")
     const CREA = app.emoji(message.client, "CREA")
 
-    const user = await users.query
-      .select()
-      .where("id", message.author.id)
-      .first()
-
-    if (!user) return
+    const user = await app.ensureUser(message.member)
 
     const userRanking = await users.query
       .select()

@@ -5,7 +5,7 @@ import blocks_keys from "../tables/blocks_keys"
 
 module.exports = new app.Command({
   name: "redeem",
-  description: "",
+  description: "Redeem a key",
   channelType: "guild",
   positional: [
     {
@@ -29,7 +29,7 @@ module.exports = new app.Command({
       .first()
 
     if (blockKey) {
-      const user = await app.ensureUser(message.author.id)
+      const user = await app.ensureUser(message.member)
 
       if (!blockKey.recipient_id) {
         await blocks_keys.query

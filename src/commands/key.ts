@@ -39,20 +39,7 @@ module.exports = new app.Command({
     const key_print = await app.createFingerPrint()
     const creation_date = app.dayjs().format("DD/MM/YY")
 
-    const user = await users.query
-      .select("money")
-      .where("id", message.author.id)
-      .first()
-
-    if (!user)
-      return channel.send(
-        new app.MessageEmbed()
-          .setTitle("Votre profil est inexistant !")
-          .setDescription(
-            `Merci de contacter <@${352176756922253321}> pour qu'il corrige ça.`
-          )
-          .setColor(app.ALERT)
-      )
+    const user = await app.ensureUser(message.member)
 
     const { money } = user
 

@@ -20,20 +20,7 @@ module.exports = new app.Command({
 
     const todayDate = app.dayjs().format("DD/MM/YY")
 
-    const user = await users.query
-      .select()
-      .where("id", message.author.id)
-      .first()
-
-    if (!user)
-      return channel.send(
-        new app.MessageEmbed()
-          .setTitle("Votre profil est inexistant !")
-          .setDescription(
-            `Merci de contacter <@${352176756922253321}> pour qu'il corrige ça.`
-          )
-          .setColor(app.ALERT)
-      )
+    const user = await app.ensureUser(message.member)
 
     if (user.last_daily !== todayDate) {
       // Si l'utilisateur n'a pas encore demandé son daily aujourd'hui, alors...
@@ -62,7 +49,7 @@ module.exports = new app.Command({
       await users.query
         .update({
           money: user.money + finalBlockReward,
-          user_tag: message.member.displayName,
+          tag: message.member.displayName,
           last_daily: todayDate,
           crea_amount: user.crea_amount + finalCreaReward,
         })

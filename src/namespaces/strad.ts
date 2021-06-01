@@ -1,7 +1,7 @@
 import * as command from "../app/command"
-import * as app from "./sendMessage"
+import discord from "discord.js"
 
-import users from "../tables/users"
+import users, { User } from "../tables/users"
 
 export const commandChannel = "415633143861739541"
 export const mentorRole = "415211884518703114"
@@ -34,15 +34,16 @@ export function getMuteRole(message: command.GuildMessage) {
   return role
 }
 
-export async function ensureUser(id: string) {
-  const user = await users.query.select().where("id", id).first()
+export async function ensureUser(member: discord.GuildMember) {
+  const user = await users.query.select().where("id", member.id).first()
 
   if (!user) {
-    const user = {
-      id,
+    const user: User = {
+      id: member.id,
       money: 0,
       crea_amount: 0,
-      user_tag: `<@${id}>`,
+      tag: member.displayName,
+      last_daily: "",
     }
     await users.query.insert(user)
     return user
