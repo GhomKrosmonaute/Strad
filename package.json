@@ -19,12 +19,12 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CamilleAbella/bot.ts.git"
+    "url": "git+https://github.com/CamilleAbella/Strad.git"
   },
   "bugs": {
-    "url": "https://github.com/CamilleAbella/bot.ts/issues"
+    "url": "https://github.com/CamilleAbella/Strad/issues"
   },
-  "homepage": "https://github.com/CamilleAbella/bot.ts#readme",
+  "homepage": "https://github.com/CamilleAbella/Strad#readme",
   "dependencies": {
     "axios": "^0.21.1",
     "boxen": "^5.0.1",
