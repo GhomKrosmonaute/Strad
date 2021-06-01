@@ -1,15 +1,13 @@
 import * as command from "../app/command"
 import * as strad from "./strad"
 
-export const modOnly: command.Middleware<command.GuildMessage> = (message) => {
+export const modOnly: command.Middleware<"guild"> = (message) => {
   return (
     message.member.roles.cache.has(strad.modRole) || "You must be a moderator!"
   )
 }
 
-export const mentorOnly: command.Middleware<command.GuildMessage> = (
-  message
-) => {
+export const mentorOnly: command.Middleware<"guild"> = (message) => {
   return (
     message.member.roles.cache.has(strad.mentorRole) || "You must be a mentor!"
   )

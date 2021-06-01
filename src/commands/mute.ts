@@ -1,9 +1,9 @@
 import * as app from "../app"
 
-const command: app.Command<app.GuildMessage> = {
+module.exports = new app.Command({
   name: "mute",
   description: "Mute member",
-  guildChannelOnly: true,
+  channelType: "guild",
   middlewares: [app.modOnly],
   positional: [
     {
@@ -79,6 +79,4 @@ const command: app.Command<app.GuildMessage> = {
       member
     )
   },
-}
-
-module.exports = command
+})

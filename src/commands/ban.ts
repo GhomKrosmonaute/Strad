@@ -1,9 +1,9 @@
 import * as app from "../app"
 
-const command: app.Command<app.GuildMessage> = {
+module.exports = new app.Command({
   name: "ban",
   description: "Ban member",
-  guildChannelOnly: true,
+  channelType: "guild",
   middlewares: [app.modOnly],
   positional: [
     {
@@ -34,6 +34,4 @@ const command: app.Command<app.GuildMessage> = {
     await app.getLogChannel(message).send(embed)
     return app.sendThenDelete(app.getCommandChannel(message), embed)
   },
-}
-
-module.exports = command
+})

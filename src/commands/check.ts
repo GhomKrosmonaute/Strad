@@ -2,10 +2,10 @@ import * as app from "../app"
 
 import blocks_keys from "../tables/blocks_keys"
 
-const command: app.Command<app.GuildMessage> = {
+module.exports = new app.Command({
   name: "check",
   description: "Check key validity",
-  guildChannelOnly: true,
+  channelType: "guild",
   positional: [
     {
       name: "key",
@@ -66,6 +66,4 @@ const command: app.Command<app.GuildMessage> = {
       )
     }
   },
-}
-
-module.exports = command
+})

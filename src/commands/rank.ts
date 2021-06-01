@@ -3,10 +3,10 @@ import * as app from "../app"
 import users from "../tables/users"
 import has_item from "../tables/has_item"
 
-const command: app.Command<app.GuildMessage> = {
+module.exports = new app.Command({
   name: "rank",
-  description: "",
-  guildChannelOnly: true,
+  description: "Show your rank",
+  channelType: "guild",
   async run(message) {
     const BLOCK = app.emoji(message.client, "BLOCK")
     const CREA = app.emoji(message.client, "CREA")
@@ -57,6 +57,4 @@ const command: app.Command<app.GuildMessage> = {
         .setColor(message.member.displayColor)
     )
   },
-}
-
-module.exports = command
+})

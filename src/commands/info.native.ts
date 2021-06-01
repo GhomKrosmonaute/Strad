@@ -5,7 +5,7 @@ import path from "path"
 
 const conf = require(path.join(process.cwd(), "package.json"))
 
-const command: app.Command = {
+module.exports = new app.Command({
   name: "info",
   description: "Get information about bot",
   flags: [
@@ -36,11 +36,12 @@ const command: app.Command = {
             }`,
             `uptime: ${tims.duration(app.uptime(), {
               format: "second",
+              maxPartCount: 2,
             })}`,
             `memory: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(
               2
             )}mb`,
-            `ping: ${Date.now() - message.createdTimestamp}ms`,
+            `ping: ${message.client.ws.ping}ms`,
             `database: ${app.db.client.constructor.name}`,
           ].join("\n"),
         }),
@@ -97,6 +98,4 @@ const command: app.Command = {
             )
     )
   },
-}
-
-module.exports = command
+})

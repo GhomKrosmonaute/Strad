@@ -4,10 +4,10 @@ import users from "../tables/users"
 import items from "../tables/items"
 import has_item from "../tables/has_item"
 
-const command: app.Command<app.GuildMessage> = {
+module.exports = new app.Command({
   name: "buy",
   description: "Buy article",
-  guildChannelOnly: true,
+  channelType: "guild",
   positional: [
     {
       name: "choice",
@@ -145,6 +145,4 @@ const command: app.Command<app.GuildMessage> = {
       }
     })
   },
-}
-
-module.exports = command
+})

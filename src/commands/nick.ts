@@ -2,10 +2,10 @@ import * as app from "../app"
 
 import has_item from "../tables/has_item"
 
-const command: app.Command<app.GuildMessage> = {
+module.exports = new app.Command({
   name: "nick",
   description: "Change your nickname",
-  guildChannelOnly: true,
+  channelType: "guild",
   positional: [
     {
       name: "name",
@@ -89,6 +89,4 @@ const command: app.Command<app.GuildMessage> = {
           .setColor(app.NEUTRAL_BLUE)
       )
   },
-}
-
-module.exports = command
+})

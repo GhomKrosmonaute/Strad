@@ -1,9 +1,9 @@
 import * as app from "../app"
 
-const command: app.Command<app.GuildMessage> = {
+module.exports = new app.Command({
   name: "help",
   aliases: ["h", "usage"],
-  guildChannelOnly: true,
+  channelType: "guild",
   description: "Help menu",
   longDescription: "Display all commands of bot or detail a target command.",
   positional: [
@@ -40,14 +40,11 @@ const command: app.Command<app.GuildMessage> = {
       }
     } else {
       if (message.args.all) {
-        new app.Paginator(
-          app.Paginator.divider(
+        new app.Paginator({
+          pages: app.Paginator.divider(
             await Promise.all(
               app.commands.map(async (cmd) => {
-                return `**${message.usedPrefix}${cmd.name}** - ${
-                  (await app.scrap(cmd.description, message)) ??
-                  "no description"
-                }`
+                return app.commandToListItem(message, cmd)
               })
             ),
             10
@@ -61,9 +58,9 @@ const command: app.Command<app.GuildMessage> = {
               .setDescription(page.join("\n"))
               .setFooter(`${message.usedPrefix}help <command>`)
           }),
-          message.channel,
-          (reaction, user) => user.id === message.author.id
-        )
+          channel: message.channel,
+          filter: (reaction, user) => user.id === message.author.id,
+        })
       } else {
         const channel = app.getCommandChannel(message)
 
@@ -135,6 +132,4 @@ const command: app.Command<app.GuildMessage> = {
       }
     }
   },
-}
-
-module.exports = command
+})

@@ -3,10 +3,10 @@ import * as app from "../app"
 import users from "../tables/users"
 import rewards from "../tables/rewards"
 
-const command: app.Command<app.GuildMessage> = {
+module.exports = new app.Command({
   name: "daily",
   description: "Daily gift",
-  guildChannelOnly: true,
+  channelType: "guild",
   async run(message) {
     message.delete().catch()
 
@@ -101,6 +101,4 @@ const command: app.Command<app.GuildMessage> = {
       )
     }
   },
-}
-
-module.exports = command
+})

@@ -1,9 +1,9 @@
 import * as app from "../app"
 
-const command: app.Command<app.GuildMessage> = {
+module.exports = new app.Command({
   name: "gsay",
   description: "Send message in specific channel",
-  guildChannelOnly: true,
+  channelType: "guild",
   middlewares: [app.mentorOnly],
   rest: {
     name: "content",
@@ -24,6 +24,4 @@ const command: app.Command<app.GuildMessage> = {
     await message.args.channel.send(message.args.content)
     return message.author.send(`${CHECK_TRUE} Envoyé !`)
   },
-}
-
-module.exports = command
+})

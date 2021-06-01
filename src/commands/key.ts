@@ -3,9 +3,10 @@ import * as app from "../app"
 import users from "../tables/users"
 import blocks_keys from "../tables/blocks_keys"
 
-const command: app.Command<app.GuildMessage> = {
+module.exports = new app.Command({
   name: "key",
   description: "Create key",
+  channelType: "guild",
   positional: [
     {
       name: "value",
@@ -124,6 +125,4 @@ const command: app.Command<app.GuildMessage> = {
         .setColor(app.NEUTRAL_BLUE)
     )
   },
-}
-
-module.exports = command
+})
