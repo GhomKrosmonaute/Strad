@@ -1,6 +1,7 @@
 import * as app from "../app"
 
 const table = new app.Table<{
+  id: number
   key_face: string
   key_value: number
   key_print: string
@@ -11,6 +12,7 @@ const table = new app.Table<{
 }>({
   name: "blocks_keys",
   setup: (table) => {
+    table.increments("id", { primaryKey: true })
     table.integer("key_value")
     table.string("key_face")
     table.string("key_print").unique()

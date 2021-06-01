@@ -1,4 +1,7 @@
 import * as command from "../app/command"
+import * as app from "./sendMessage"
+
+import users from "../tables/users"
 
 export const commandChannel = "415633143861739541"
 export const mentorRole = "415211884518703114"
@@ -29,4 +32,21 @@ export function getMuteRole(message: command.GuildMessage) {
   if (!role) throw new Error("Mute role not longer exists!")
 
   return role
+}
+
+export async function ensureUser(id: string) {
+  const user = await users.query.select().where("id", id).first()
+
+  if (!user) {
+    const user = {
+      id,
+      money: 0,
+      crea_amount: 0,
+      user_tag: `<@${id}>`,
+    }
+    await users.query.insert(user)
+    return user
+  }
+
+  return user
 }
