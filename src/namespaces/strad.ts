@@ -1,5 +1,5 @@
 import * as command from "../app/command"
-import discord from "discord.js"
+import * as discord from "discord.js"
 
 import users, { User } from "../tables/users"
 
@@ -10,16 +10,16 @@ export const muteRole = "623255065716588546"
 export const modRole = "444950686833311744"
 export const guild = "412369732679893004"
 
-export function getCommandChannel(message: command.GuildMessage) {
-  const channel = message.client.channels.cache.get(commandChannel)
+export function getCommandChannel({ client }: { client: discord.Client }) {
+  const channel = client.channels.cache.get(commandChannel)
 
   if (!channel?.isText()) throw new Error("Command channel not longer exists!")
 
   return channel
 }
 
-export function getLogChannel(message: command.GuildMessage) {
-  const channel = message.client.channels.cache.get(logChannel)
+export function getLogChannel({ client }: { client: discord.Client }) {
+  const channel = client.channels.cache.get(logChannel)
 
   if (!channel?.isText()) throw new Error("Log channel not longer exists!")
 
