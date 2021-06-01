@@ -4,7 +4,7 @@ const listener: app.Listener<"guildBanAdd"> = {
   event: "guildBanAdd",
   async run(guild, user) {
     return app
-      .getLogChannel(guild)
+      .getChannel(guild, "log")
       .send(
         new app.MessageEmbed()
           .setTitle("Membre Banni")

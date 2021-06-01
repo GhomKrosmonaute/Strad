@@ -18,8 +18,8 @@ module.exports = new app.Command({
   async run(message) {
     const BLOCK = app.emoji(message.client, "BLOCK")
 
-    const channel = app.getCommandChannel(message)
-    const log = app.getLogChannel(message)
+    const channel = app.getChannel(message, "command")
+    const log = app.getChannel(message, "log")
 
     const minAllowedValue = 50
     const maxAllowedValue = 15000

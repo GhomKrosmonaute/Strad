@@ -21,7 +21,7 @@ module.exports = new app.Command({
 
     const BLOCK = app.emoji(message.client, "BLOCK")
 
-    const channel = app.getCommandChannel(message)
+    const channel = app.getChannel(message, "command")
 
     const result = await users.query
       .select("money")

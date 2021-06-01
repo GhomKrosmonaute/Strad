@@ -31,7 +31,7 @@ module.exports = new app.Command({
       )
       .setColor(app.ALERT)
 
-    await app.getLogChannel(message).send(embed)
-    return app.sendThenDelete(app.getCommandChannel(message), embed)
+    await app.getChannel(message, "log").send(embed)
+    return app.sendThenDelete(app.getChannel(message, "command"), embed)
   },
 })

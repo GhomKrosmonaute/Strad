@@ -23,7 +23,7 @@ module.exports = new app.Command({
 
     if (!sayItem || sayItem.amount < 1)
       return app
-        .getCommandChannel(message)
+        .getChannel(message, "command")
         .send(
           new app.MessageEmbed()
             .setTitle("Boutique")
@@ -41,7 +41,7 @@ module.exports = new app.Command({
       .and.where("item_id", 2)
 
     return app
-      .getLogChannel(message)
+      .getChannel(message, "log")
       .send(
         new app.MessageEmbed()
           .setTitle("Strad say")

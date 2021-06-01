@@ -16,7 +16,7 @@ module.exports = new app.Command({
     const DOWNVOTE = app.emoji(message.client, "DOWNVOTE")
     const DOWNLOAD = app.emoji(message.client, "DOWNLOAD")
 
-    const channel = app.getCommandChannel(message)
+    const channel = app.getChannel(message, "command")
 
     const todayDate = app.dayjs().format("DD/MM/YY")
 

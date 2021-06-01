@@ -1,37 +1,51 @@
-import * as command from "../app/command"
 import * as discord from "discord.js"
 
 import users, { User } from "../tables/users"
 
-export const commandChannel = "415633143861739541"
-export const mentorRole = "415211884518703114"
-export const logChannel = "419506197847343132"
-export const muteRole = "623255065716588546"
-export const modRole = "444950686833311744"
 export const guild = "412369732679893004"
 
-export function getCommandChannel({ client }: { client: discord.Client }) {
-  const channel = client.channels.cache.get(commandChannel)
-
-  if (!channel?.isText()) throw new Error("Command channel not longer exists!")
-
-  return channel
+export const roles = {
+  apprentice: "412587462892716032",
+  mentor: "415211884518703114",
+  mute: "623255065716588546",
+  mod: "444950686833311744",
 }
 
-export function getLogChannel({ client }: { client: discord.Client }) {
-  const channel = client.channels.cache.get(logChannel)
-
-  if (!channel?.isText()) throw new Error("Log channel not longer exists!")
-
-  return channel
+export const channels = {
+  general: "412369732679893008",
+  command: "415633143861739541",
+  log: "419506197847343132",
 }
 
-export function getMuteRole(message: command.GuildMessage) {
-  const role = message.guild.roles.cache.get(muteRole)
+export const categories = {
+  memberCount: "443782424653070346",
+}
 
-  if (!role) throw new Error("Mute role not longer exists!")
+export function getChannel(
+  { client }: { client: discord.Client },
+  label: keyof typeof channels
+) {
+  const channel = client.channels.cache.get(channels[label])
+  if (channel instanceof discord.TextChannel) return channel
+  throw new Error(label + " channel not longer exists!")
+}
 
-  return role
+export function getCategory(
+  { client }: { client: discord.Client },
+  label: keyof typeof categories
+) {
+  const channel = client.channels.cache.get(categories[label])
+  if (channel instanceof discord.CategoryChannel) return channel
+  throw new Error(label + " category not longer exists!")
+}
+
+export function getRole(
+  { guild }: { guild: discord.Guild },
+  label: keyof typeof roles
+) {
+  const role = guild.roles.cache.get(roles[label])
+  if (role) return role
+  throw new Error(label + " role not longer exists!")
 }
 
 export async function ensureUser(member: discord.GuildMember) {

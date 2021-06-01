@@ -62,7 +62,7 @@ module.exports = new app.Command({
           filter: (reaction, user) => user.id === message.author.id,
         })
       } else {
-        const channel = app.getCommandChannel(message)
+        const channel = app.getChannel(message, "command")
 
         await channel.send(
           new app.MessageEmbed()
@@ -111,7 +111,7 @@ module.exports = new app.Command({
             .setColor(app.NEUTRAL_BLUE)
         )
 
-        if (message.member.roles.cache.has(app.modRole)) {
+        if (message.member.roles.cache.has(app.roles.mod)) {
           return message.author.send(
             new app.MessageEmbed()
               .setTitle("Help (suite)")

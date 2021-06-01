@@ -10,7 +10,7 @@ module.exports = new app.Command({
       Nouveau: "https://github.com/CamilleAbella/Strad",
       Ancien: "https://github.com/Tagueo/new-strad",
     }
-    return app.getCommandChannel(message).send(
+    return app.getChannel(message, "command").send(
       new app.MessageEmbed()
         .setAuthor("Dépôts de Strad", message.client.user.displayAvatarURL())
         .setColor("#21b1ff")

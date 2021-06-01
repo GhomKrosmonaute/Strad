@@ -62,6 +62,6 @@ module.exports = new app.Command({
       )
     }
 
-    return app.getCommandChannel(message).send(embed)
+    return app.getChannel(message, "command").send(embed)
   },
 })

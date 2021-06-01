@@ -28,14 +28,14 @@ module.exports = new app.Command({
   async run(message) {
     message.delete().catch()
 
-    const role = app.getMuteRole(message)
+    const role = app.getRole(message, "mute")
     const member: app.GuildMember = message.args.target
     const duration: number = message.args.duration
     const reason: string = message.args.reason
 
     if (duration < 1 || duration > 360)
       return app
-        .getCommandChannel(message)
+        .getChannel(message, "command")
         .send(
           new app.MessageEmbed()
             .setTitle("Durée non conforme")
@@ -47,7 +47,7 @@ module.exports = new app.Command({
 
     if (reason.length < 10)
       return app
-        .getCommandChannel(message)
+        .getChannel(message, "command")
         .send(
           new app.MessageEmbed()
             .setTitle("Raison insuffisante")
@@ -66,8 +66,8 @@ module.exports = new app.Command({
       )
       .setColor(app.ALERT)
 
-    await app.getLogChannel(message).send(embed)
-    await app.sendThenDelete(app.getCommandChannel(message), embed)
+    await app.getChannel(message, "log").send(embed)
+    await app.sendThenDelete(app.getChannel(message, "command"), embed)
 
     setTimeout(
       (member: app.GuildMember) => {

@@ -36,7 +36,7 @@ module.exports = new app.Command({
 
     const userRank = userRanking.indexOf(user) + 1
 
-    return app.getCommandChannel(message).send(
+    return app.getChannel(message, "command").send(
       new app.MessageEmbed()
         .setAuthor(
           message.author.tag,

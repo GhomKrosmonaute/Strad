@@ -20,7 +20,7 @@ module.exports = new app.Command({
     const KEY_VALID = app.emoji(message.client, "KEY_VALID")
     const KEY_USED = app.emoji(message.client, "KEY_USED")
 
-    const channel = app.getCommandChannel(message)
+    const channel = app.getChannel(message, "command")
 
     const key = await blocks_keys.query
       .select()

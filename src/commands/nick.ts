@@ -15,7 +15,7 @@ module.exports = new app.Command({
   async run(message) {
     message.delete().catch()
 
-    const channel = app.getCommandChannel(message)
+    const channel = app.getChannel(message, "command")
 
     if (!message.args.name)
       return channel.send(
@@ -81,7 +81,7 @@ module.exports = new app.Command({
     )
 
     return app
-      .getLogChannel(message)
+      .getChannel(message, "log")
       .send(
         new app.MessageEmbed()
           .setTitle("Changement de pseudonyme")

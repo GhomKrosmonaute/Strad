@@ -19,7 +19,7 @@ module.exports = new app.Command({
 
     const BLOCK = app.emoji(message.client, "BLOCK")
 
-    const channel = app.getCommandChannel(message)
+    const channel = app.getChannel(message, "command")
 
     const todayDate = app.dayjs().format("DD/MM/YY")
 
@@ -56,7 +56,7 @@ module.exports = new app.Command({
         )
 
         return app
-          .getLogChannel(message)
+          .getChannel(message, "log")
           .send(
             new app.MessageEmbed()
               .setTitle("Récupération de clé")
