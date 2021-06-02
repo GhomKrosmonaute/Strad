@@ -1,5 +1,7 @@
 import * as discord from "discord.js"
 
+import * as emojis from "./emojis"
+
 import users, { User } from "../tables/users"
 
 export const guild = "412369732679893004"
@@ -14,6 +16,11 @@ export const creationChannels = [
   "442374005177974825",
 ]
 
+export const reactionRoleMessages = {
+  creation: "570618282177069076",
+  notification: "601739344163897344",
+}
+
 export const roles = {
   apprentice: "412587462892716032",
   sanction: "416926896744300544",
@@ -21,6 +28,19 @@ export const roles = {
   mentor: "415211884518703114",
   mute: "623255065716588546",
   mod: "444950686833311744",
+
+  // creator
+  graphicDesigner: "412623510649831424",
+  drawDesigner: "412623624248492052",
+  videoDesigner: "412623697653006340",
+  photographer: "425740031815319552",
+  soundDesigner: "416940144285843466",
+  developer: "442651392721813506",
+
+  // notification
+  news: "",
+  events: "",
+  streams: "",
 }
 
 export const channels = {
@@ -29,6 +49,26 @@ export const channels = {
   general: "412369732679893008",
   command: "415633143861739541",
   log: "419506197847343132",
+}
+
+export const reactionRoleReactions: {
+  [key in keyof typeof reactionRoleMessages]: {
+    [k: string]: keyof typeof roles
+  }
+} = {
+  creation: {
+    "📝": "graphicDesigner",
+    "🎞": "videoDesigner",
+    "🎨": "drawDesigner",
+    "📸": "photographer",
+    "💻": "developer",
+    "🎹": "soundDesigner",
+  },
+  notification: {
+    "🔔": "news",
+    "🎉": "events",
+    "📡": "streams",
+  },
 }
 
 export const answers = {
@@ -43,6 +83,24 @@ export const answers = {
 
 export const categories = {
   memberCount: "443782424653070346",
+}
+
+export function getReactionRole(
+  reaction: discord.MessageReaction
+): discord.Role | null {
+  for (const type in reactionRoleMessages) {
+    if (type === reaction.message.id) {
+      const reactionRoleReaction =
+        reactionRoleReactions[type as keyof typeof reactionRoleMessages]
+      if (reactionRoleReaction.hasOwnProperty(reaction.emoji.name)) {
+        const roleID =
+          roles[reactionRoleReaction[reaction.emoji.name as string]]
+        return reaction.message.guild?.roles.cache.get(roleID) ?? null
+      }
+    }
+  }
+
+  return null
 }
 
 export function getChannel(
@@ -88,4 +146,120 @@ export async function ensureUser(member: discord.GuildMember) {
   }
 
   return user
+}
+
+export function feedback(
+  reaction: discord.MessageReaction,
+  member: discord.GuildMember
+) {
+  const BLOCK = emojis.emoji(reaction.client, "BLOCK")
+  const UPVOTE = emojis.emoji(reaction.client, "UPVOTE")
+  const DOWNVOTE = emojis.emoji(reaction.client, "DOWNVOTE")
+  const DOWNLOAD = emojis.emoji(reaction.client, "DOWNLOAD")
+  const ENABLE_VOTES = "✨"
+
+  if (
+    reaction.emoji.id === DOWNLOAD.id &&
+    (reaction.message.reactions.cache.filter(
+      (reaction) =>
+        reaction.emoji.id === UPVOTE.id &&
+        reaction.users.cache.some(
+          (user) => user.id === reaction.client.user?.id
+        )
+    ).size > 0
+      ? true
+      : false)
+  ) {
+    if (
+      reaction.message.author.id === member.id ||
+      !reaction.message.attachments
+    ) {
+      return reaction.users.remove(member)
+    }
+
+    const attachment = reaction.message.attachments.first()
+    const imageInformations = await probe(attachment.url).catch(console.error)
+    const dimensions = imageInformations
+      ? `${imageInformations.width}${imageInformations.hUnits} x ${imageInformations.height}${imageInformations.hUnits}`
+      : "Dimension inconnue"
+    const description = `En téléchargeant la création de ${reaction.message.member.displayName}, tu as ajouté **2** ${blockEmoji} sur sa prochaine récompense !`
+    const fileExtension = imageInformations
+      ? imageInformations.type
+      : "Extension inconnue"
+
+    const response = await connection.query(
+      `SELECT * FROM rewards WHERE rewarder_id = "${user.id}" AND message_id = "${reaction.message.id}" AND type = "DL"`
+    )
+    if (!response[0]) {
+      await connection.query(
+        `INSERT INTO rewards (message_id, rewarded_id, rewarder_id, type, submit_date) VALUES ("${
+          reaction.message.id
+        }", "${reaction.message.author.id}", "${
+          user.id
+        }", "DL", "${moment().format("DD/MM/YY")}")`
+      )
+    }
+
+    const downloadEmbed = new Discord.RichEmbed()
+      .setTitle(`Téléchargement de ${attachment.filename}`)
+      .setDescription(
+        `${description}
+      Dimensions : ${dimensions} / Type : ${fileExtension}`
+      )
+      .setColor(colors.DOWNLOAD)
+      .addField(`Lien de téléchargement`, attachment.proxyURL)
+    user.send(downloadEmbed)
+  } else if (
+    !checkFeedbackable(reaction.message) &&
+    reaction.emoji.name === enableVotesEmoji
+  ) {
+    reaction.remove(user)
+    return
+  } else if (
+    reaction.emoji.id === upVoteEmoji ||
+    reaction.emoji.id === downVoteEmoji
+  ) {
+    if (
+      reaction.message.author.id === user.id ||
+      !checkFeedbackActivation(reaction.message)
+    ) {
+      reaction.remove(user)
+      return
+    }
+
+    const voteType = reaction.emoji.id === upVoteEmoji ? "UV" : "DV"
+
+    const response = await connection.query(
+      `SELECT * FROM rewards WHERE rewarder_id = "${user.id}" AND message_id = "${reaction.message.id}" AND type IN ("UV", "DV")`
+    )
+    if (response[0]) return
+
+    await connection.query(
+      `INSERT INTO rewards (message_id, rewarded_id, rewarder_id, type, submit_date) VALUES ("${
+        reaction.message.id
+      }", "${reaction.message.author.id}", "${
+        user.id
+      }", "${voteType}", "${moment().format("DD/MM/YY")}")`
+    )
+
+    connection.end()
+  } else if (reaction.emoji.name === enableVotesEmoji) {
+    if (
+      user.id === reaction.message.author.id &&
+      !checkFeedbackActivation(reaction.message)
+    ) {
+      await reaction.remove(client.user)
+      await reaction.message.react(
+        client.emojis.get(client.assets.emojiIds.UPVOTE)
+      )
+      await reaction.message.react(
+        client.emojis.get(client.assets.emojiIds.DOWNVOTE)
+      )
+      if (reaction.message.attachments)
+        await reaction.message.react(
+          client.emojis.get(client.assets.emojiIds.DOWNLOAD)
+        )
+    }
+    reaction.remove(user)
+  }
 }
