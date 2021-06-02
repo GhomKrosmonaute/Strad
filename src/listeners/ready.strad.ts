@@ -3,6 +3,13 @@ import * as app from "../app"
 const listener: app.Listener<"ready"> = {
   event: "ready",
   async run() {
+    this.user
+      ?.setActivity(`Strad help`, {
+        type: "STREAMING",
+        url: "https://www.twitch.tv/delphistudio",
+      })
+      .catch()
+
     this.on("raw", async (packet: any) => {
       const { d: data, t: type } = packet
       if (!["MESSAGE_REACTION_ADD", "MESSAGE_REACTION_REMOVE"].includes(type))
