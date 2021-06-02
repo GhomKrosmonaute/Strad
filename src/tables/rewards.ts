@@ -1,19 +1,29 @@
 import * as app from "../app"
 
-const table = new app.Table<{
+export interface Reward {
   type: "UV" | "DV" | "DL"
+  message_id: string
+  rewarder_id: string
   rewarded_id: string
-  daily_date: string | null
-}>({
+  submit_date: string | null
+}
+
+const table = new app.Table<Reward>({
   name: "rewards",
   setup: (table) => {
     table.string("type", 2)
+    table.string("message_id")
+    table
+      .string("rewarder_id")
+      .references("id")
+      .inTable("users")
+      .onDelete("CASCADE")
     table
       .string("rewarded_id")
       .references("id")
       .inTable("users")
       .onDelete("CASCADE")
-    table.string("daily_date").nullable()
+    table.string("submit_date").nullable()
   },
 })
 

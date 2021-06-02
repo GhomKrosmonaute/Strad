@@ -39,7 +39,7 @@ module.exports = new app.Command({
       // Suppression des votes
       await rewards.query
         .update({
-          daily_date: todayDate,
+          submit_date: todayDate,
         })
         .where("daily_date", null)
         .and.where("rewarded_id", message.author.id)

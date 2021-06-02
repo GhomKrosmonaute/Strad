@@ -1,8 +1,10 @@
 import * as discord from "discord.js"
-
 import * as emojis from "./emojis"
+import * as colors from "./colors"
+import * as core from "../app/core"
 
 import users, { User } from "../tables/users"
+import rewards, { Reward } from "../tables/rewards"
 
 export const guild = "412369732679893004"
 
@@ -23,8 +25,10 @@ export const reactionRoleMessages = {
 
 export const roles = {
   apprentice: "412587462892716032",
+  assistant: "",
   sanction: "416926896744300544",
   waiting: "444134229710864385",
+  member: "443748696170168321",
   mentor: "415211884518703114",
   mute: "623255065716588546",
   mod: "444950686833311744",
@@ -148,7 +152,7 @@ export async function ensureUser(member: discord.GuildMember) {
   return user
 }
 
-export function feedback(
+export async function feedback(
   reaction: discord.MessageReaction,
   member: discord.GuildMember
 ) {
@@ -158,18 +162,18 @@ export function feedback(
   const DOWNLOAD = emojis.emoji(reaction.client, "DOWNLOAD")
   const ENABLE_VOTES = "✨"
 
-  if (
-    reaction.emoji.id === DOWNLOAD.id &&
-    (reaction.message.reactions.cache.filter(
+  const attachment = reaction.message.attachments.first()
+
+  const isFeedbackable =
+    reaction.message.reactions.cache.filter(
       (reaction) =>
         reaction.emoji.id === UPVOTE.id &&
         reaction.users.cache.some(
           (user) => user.id === reaction.client.user?.id
         )
     ).size > 0
-      ? true
-      : false)
-  ) {
+
+  if (reaction.emoji.id === DOWNLOAD.id && isFeedbackable && attachment) {
     if (
       reaction.message.author.id === member.id ||
       !reaction.message.attachments
@@ -177,89 +181,69 @@ export function feedback(
       return reaction.users.remove(member)
     }
 
-    const attachment = reaction.message.attachments.first()
-    const imageInformations = await probe(attachment.url).catch(console.error)
-    const dimensions = imageInformations
-      ? `${imageInformations.width}${imageInformations.hUnits} x ${imageInformations.height}${imageInformations.hUnits}`
-      : "Dimension inconnue"
-    const description = `En téléchargeant la création de ${reaction.message.member.displayName}, tu as ajouté **2** ${blockEmoji} sur sa prochaine récompense !`
-    const fileExtension = imageInformations
-      ? imageInformations.type
-      : "Extension inconnue"
+    const rewardData = await rewards.query
+      .select()
+      .where("rewarder_id", member.id)
+      .and.where("message_id", reaction.message.id)
+      .and.where("type", "DL")
+      .first()
 
-    const response = await connection.query(
-      `SELECT * FROM rewards WHERE rewarder_id = "${user.id}" AND message_id = "${reaction.message.id}" AND type = "DL"`
-    )
-    if (!response[0]) {
-      await connection.query(
-        `INSERT INTO rewards (message_id, rewarded_id, rewarder_id, type, submit_date) VALUES ("${
-          reaction.message.id
-        }", "${reaction.message.author.id}", "${
-          user.id
-        }", "DL", "${moment().format("DD/MM/YY")}")`
-      )
+    let reward: Reward = rewardData ?? {
+      message_id: reaction.message.id,
+      rewarded_id: reaction.message.author.id,
+      rewarder_id: member.id,
+      type: "DL",
+      submit_date: core.dayjs().format("DD/MM/YY"),
     }
 
-    const downloadEmbed = new Discord.RichEmbed()
-      .setTitle(`Téléchargement de ${attachment.filename}`)
-      .setDescription(
-        `${description}
-      Dimensions : ${dimensions} / Type : ${fileExtension}`
-      )
-      .setColor(colors.DOWNLOAD)
-      .addField(`Lien de téléchargement`, attachment.proxyURL)
-    user.send(downloadEmbed)
-  } else if (
-    !checkFeedbackable(reaction.message) &&
-    reaction.emoji.name === enableVotesEmoji
-  ) {
-    reaction.remove(user)
-    return
-  } else if (
-    reaction.emoji.id === upVoteEmoji ||
-    reaction.emoji.id === downVoteEmoji
-  ) {
-    if (
-      reaction.message.author.id === user.id ||
-      !checkFeedbackActivation(reaction.message)
-    ) {
-      reaction.remove(user)
-      return
-    }
+    if (!rewardData) await rewards.query.insert(reward)
 
-    const voteType = reaction.emoji.id === upVoteEmoji ? "UV" : "DV"
-
-    const response = await connection.query(
-      `SELECT * FROM rewards WHERE rewarder_id = "${user.id}" AND message_id = "${reaction.message.id}" AND type IN ("UV", "DV")`
-    )
-    if (response[0]) return
-
-    await connection.query(
-      `INSERT INTO rewards (message_id, rewarded_id, rewarder_id, type, submit_date) VALUES ("${
-        reaction.message.id
-      }", "${reaction.message.author.id}", "${
-        user.id
-      }", "${voteType}", "${moment().format("DD/MM/YY")}")`
-    )
-
-    connection.end()
-  } else if (reaction.emoji.name === enableVotesEmoji) {
-    if (
-      user.id === reaction.message.author.id &&
-      !checkFeedbackActivation(reaction.message)
-    ) {
-      await reaction.remove(client.user)
-      await reaction.message.react(
-        client.emojis.get(client.assets.emojiIds.UPVOTE)
-      )
-      await reaction.message.react(
-        client.emojis.get(client.assets.emojiIds.DOWNVOTE)
-      )
-      if (reaction.message.attachments)
-        await reaction.message.react(
-          client.emojis.get(client.assets.emojiIds.DOWNLOAD)
+    return member.send(
+      new discord.MessageEmbed()
+        .setTitle(`Téléchargement de ${attachment.name}`)
+        .setDescription(
+          `En téléchargeant la création de ${reaction.message.member?.displayName}, tu as ajouté **2** ${BLOCK} sur sa prochaine récompense !`
         )
+        .setColor(colors.DOWNLOAD)
+        .addField(`Lien de téléchargement`, attachment.proxyURL)
+    )
+  } else if (!isFeedbackable && reaction.emoji.name === ENABLE_VOTES) {
+    return reaction.users.remove(member)
+  } else if (
+    reaction.emoji.id === UPVOTE.id ||
+    reaction.emoji.id === DOWNVOTE.id
+  ) {
+    if (reaction.message.author.id === member.id || !isFeedbackable) {
+      return reaction.users.remove(member)
     }
-    reaction.remove(user)
+
+    const voteType = reaction.emoji.id === UPVOTE.id ? "UV" : "DV"
+
+    const rewardData = await rewards.query
+      .select()
+      .where("rewarder_id", member.id)
+      .and.where("message_id", reaction.message.id)
+      .and.whereIn("type", ["UV", "DV"])
+      .first()
+
+    let reward: Reward = rewardData ?? {
+      message_id: reaction.message.id,
+      rewarded_id: reaction.message.author.id,
+      rewarder_id: member.id,
+      type: voteType,
+      submit_date: core.dayjs().format("DD/MM/YY"),
+    }
+
+    if (!rewardData) await rewards.query.insert(reward)
+  } else if (reaction.emoji.name === ENABLE_VOTES) {
+    if (member.id === reaction.message.author.id && !isFeedbackable) {
+      await reaction.users.remove()
+      await reaction.message.react(UPVOTE)
+      await reaction.message.react(DOWNVOTE)
+      if (reaction.message.attachments.size > 0)
+        await reaction.message.react(DOWNLOAD)
+    }
+
+    return reaction.users.remove(member)
   }
 }
