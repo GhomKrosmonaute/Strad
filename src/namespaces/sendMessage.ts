@@ -16,3 +16,14 @@ export async function sendThenDelete(
       .catch(reject)
   )
 }
+
+export function containsMedia(message: discord.Message) {
+  const mContent = message.content.toUpperCase()
+  return (
+    (message.attachments.size !== 0 || mContent.includes("HTTP")) &&
+    !mContent.includes("[PARTAGE]") &&
+    !mContent.includes("[RES]") &&
+    !mContent.includes("GIPHY.COM") &&
+    !mContent.includes("TENOR.COM")
+  )
+}

@@ -4,17 +4,41 @@ import users, { User } from "../tables/users"
 
 export const guild = "412369732679893004"
 
+export const creationChannels = [
+  "412622887317405707",
+  "412622912043089920",
+  "412622999267704834",
+  "416227695429550100",
+  "425739003623374848",
+  "438794104621629441",
+  "442374005177974825",
+]
+
 export const roles = {
   apprentice: "412587462892716032",
+  sanction: "416926896744300544",
+  waiting: "444134229710864385",
   mentor: "415211884518703114",
   mute: "623255065716588546",
   mod: "444950686833311744",
 }
 
 export const channels = {
+  presentation: "412557168529899541",
+  beforeAfter: "568677435793604649",
   general: "412369732679893008",
   command: "415633143861739541",
   log: "419506197847343132",
+}
+
+export const answers = {
+  "strad ?": "Oui ?",
+  "hé strad ?": "Cette blague ? Non arrête, c'est trop xD",
+  "au revoir": "Bye !",
+  salut: "Salut !",
+  patates:
+    "Oui, j'avoue apprécier ce légume fort patatoïdal que vous mélangez parfois avec de la viande...",
+  "superdelphi est génial": "Oh... Et moi ? :cry:",
 }
 
 export const categories = {
