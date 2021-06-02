@@ -17,7 +17,7 @@ const listener: app.Listener<"messageReactionAdd"> = {
 
     const reactionRole = app.getReactionRole(reaction)
 
-    if (reactionRole) return member.roles.add(reactionRole)
+    if (reactionRole) return member.roles.add(reactionRole).catch()
 
     if (app.creationChannels.includes(message.channel.id))
       return app.feedback(reaction, member)
