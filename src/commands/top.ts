@@ -2,7 +2,7 @@ import * as app from "../app"
 
 import users from "../tables/users"
 
-module.exports = new app.Command({
+export default new app.Command({
   name: "top",
   aliases: ["ladder", "board", "leaderboard", "lb"],
   description: "Leaderboard",

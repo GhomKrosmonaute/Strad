@@ -9,7 +9,7 @@ export interface User {
   crea_amount: number
 }
 
-const table = new app.Table<User>({
+export default new app.Table<User>({
   name: "users",
   priority: 5,
   setup: (table) => {
@@ -21,5 +21,3 @@ const table = new app.Table<User>({
     table.integer("crea_amount").defaultTo(0)
   },
 })
-
-export default table

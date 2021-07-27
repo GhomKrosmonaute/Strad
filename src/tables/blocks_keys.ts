@@ -1,6 +1,6 @@
 import * as app from "../app"
 
-const table = new app.Table<{
+export default new app.Table<{
   id: number
   key_face: string
   key_value: number
@@ -22,5 +22,3 @@ const table = new app.Table<{
     table.string("recipient_id").nullable()
   },
 })
-
-export default table

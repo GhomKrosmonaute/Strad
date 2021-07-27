@@ -2,7 +2,7 @@ import * as app from "../app"
 
 import items from "../tables/items"
 
-module.exports = new app.Command({
+export default new app.Command({
   name: "shop",
   description: "The shop command",
   channelType: "guild",

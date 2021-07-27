@@ -35,4 +35,4 @@ const listener: app.Listener<"guildMemberAdd"> = {
   },
 }
 
-module.exports = listener
+export default listener

@@ -1,4 +1,5 @@
-import Discord from "discord.js"
+import discord from "discord.js"
+import discordButtons from "discord-buttons"
 
 import "dotenv/config"
 
@@ -8,21 +9,25 @@ for (const key of ["BOT_TOKEN", "BOT_PREFIX", "BOT_OWNER"]) {
   }
 }
 
-const client = new Discord.Client()
+const client = new discord.Client()
 
 ;(async () => {
+  discordButtons(client)
+
   const app = await import("./app")
 
   try {
     await client.login(process.env.BOT_TOKEN)
 
-    if (!app.isFullClient(client))
-      throw new Error("The Discord client is not full.")
+    if (!app.isFullClient(client)) {
+      app.error("The Discord client is not full.", "system")
+      client.destroy()
+      process.exit(1)
+    }
 
     await app.tableHandler.load(client)
     await app.commandHandler.load(client)
     await app.listenerHandler.load(client)
-    await app.slashCommandHandler.load(client)
   } catch (error) {
     app.error(error, "system", true)
   }

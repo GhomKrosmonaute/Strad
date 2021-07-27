@@ -8,7 +8,7 @@ export interface Reward {
   submit_date: string | null
 }
 
-const table = new app.Table<Reward>({
+export default new app.Table<Reward>({
   name: "rewards",
   setup: (table) => {
     table.string("type", 2)
@@ -26,5 +26,3 @@ const table = new app.Table<Reward>({
     table.string("submit_date").nullable()
   },
 })
-
-export default table

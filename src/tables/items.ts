@@ -1,6 +1,6 @@
 import * as app from "../app"
 
-const table = new app.Table<{
+export default new app.Table<{
   id: number
   name: string
   emoji: string
@@ -27,5 +27,3 @@ const table = new app.Table<{
     table.string("description")
   },
 })
-
-export default table

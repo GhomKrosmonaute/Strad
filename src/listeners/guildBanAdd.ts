@@ -14,4 +14,4 @@ const listener: app.Listener<"guildBanAdd"> = {
   },
 }
 
-module.exports = listener
+export default listener

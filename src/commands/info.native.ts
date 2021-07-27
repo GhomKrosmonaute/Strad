@@ -5,7 +5,7 @@ import path from "path"
 
 const conf = require(path.join(process.cwd(), "package.json"))
 
-module.exports = new app.Command({
+export default new app.Command({
   name: "info",
   description: "Get information about bot",
   flags: [
@@ -55,6 +55,9 @@ module.exports = new app.Command({
             `guilds: ${message.client.guilds.cache.size}`,
             `users: ${message.client.users.cache.size}`,
             `channels: ${message.client.channels.cache.size}`,
+            `roles: ${message.client.guilds.cache.reduce((acc, guild) => {
+              return acc + guild.roles.cache.size
+            }, 0)}`,
             `messages: ${message.client.channels.cache.reduce(
               (acc, channel) => {
                 return (

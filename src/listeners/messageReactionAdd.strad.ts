@@ -9,7 +9,7 @@ const listener: app.Listener<"messageReactionAdd"> = {
     const CHECK_TRUE = app.emoji(message.client, "CHECK_TRUE")
     const REPORT = app.emoji(message.client, "REPORT")
 
-    if (!app.isCommandMessage(message)) return
+    if (!app.isNormalMessage(message)) return
     if (!app.isGuildMessage(message)) return
     if (user.bot) return
 
@@ -152,4 +152,4 @@ const listener: app.Listener<"messageReactionAdd"> = {
   },
 }
 
-module.exports = listener
+export default listener

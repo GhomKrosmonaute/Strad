@@ -1,6 +1,6 @@
 import * as app from "../app"
 
-const table = new app.Table<{
+export default new app.Table<{
   user_id: string
   item_id: number
   amount: number
@@ -20,5 +20,3 @@ const table = new app.Table<{
     table.integer("amount").defaultTo(0)
   },
 })
-
-export default table

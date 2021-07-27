@@ -1,6 +1,6 @@
 import * as app from "../app"
 
-module.exports = new app.Command({
+export default new app.Command({
   name: "gsay",
   description: "Send message in specific channel",
   channelType: "guild",

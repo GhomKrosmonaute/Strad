@@ -3,7 +3,7 @@ import * as app from "../app"
 import users from "../tables/users"
 import blocks_keys from "../tables/blocks_keys"
 
-module.exports = new app.Command({
+export default new app.Command({
   name: "redeem",
   description: "Redeem a key",
   channelType: "guild",

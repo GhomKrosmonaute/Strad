@@ -5,7 +5,7 @@ const listener: app.Listener<"messageReactionRemove"> = {
   async run(reaction, user) {
     const message = reaction.message
 
-    if (!app.isCommandMessage(message)) return
+    if (!app.isNormalMessage(message)) return
     if (!app.isGuildMessage(message)) return
     if (user.bot) return
 
@@ -17,4 +17,4 @@ const listener: app.Listener<"messageReactionRemove"> = {
   },
 }
 
-module.exports = listener
+export default listener

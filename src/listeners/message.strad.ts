@@ -5,7 +5,7 @@ const listener: app.Listener<"message"> = {
   async run(message) {
     if (message.type === "PINS_ADD") return message.delete()
 
-    if (!app.isCommandMessage(message)) return
+    if (!app.isNormalMessage(message)) return
     if (!app.isGuildMessage(message)) return
     if (message.author.bot) return
 
@@ -83,4 +83,4 @@ const listener: app.Listener<"message"> = {
   },
 }
 
-module.exports = listener
+export default listener

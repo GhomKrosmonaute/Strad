@@ -3,7 +3,7 @@ import * as app from "../app"
 import users from "../tables/users"
 import rewards from "../tables/rewards"
 
-module.exports = new app.Command({
+export default new app.Command({
   name: "daily",
   description: "Daily gift",
   channelType: "guild",

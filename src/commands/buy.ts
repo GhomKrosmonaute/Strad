@@ -4,7 +4,7 @@ import users from "../tables/users"
 import items from "../tables/items"
 import has_item from "../tables/has_item"
 
-module.exports = new app.Command({
+export default new app.Command({
   name: "buy",
   description: "Buy article",
   channelType: "guild",

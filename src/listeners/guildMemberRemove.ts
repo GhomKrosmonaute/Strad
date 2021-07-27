@@ -23,4 +23,4 @@ const listener: app.Listener<"guildMemberRemove"> = {
   },
 }
 
-module.exports = listener
+export default listener

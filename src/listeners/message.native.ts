@@ -4,19 +4,53 @@ import yargsParser from "yargs-parser"
 const listener: app.Listener<"message"> = {
   event: "message",
   async run(message) {
-    if (!app.isCommandMessage(message)) return
+    if (!app.isNormalMessage(message)) return
+
+    const prefix = await app.prefix(message.guild ?? undefined)
+
+    if (new RegExp(`^<@!?${message.client.user.id}>$`).test(message.content))
+      return message.channel.send(
+        new app.MessageEmbed()
+          .setColor("BLURPLE")
+          .setDescription(`My prefix is \`${prefix}\``)
+      )
+
+    message.usedAsDefault = false
+
+    message.send = async function (
+      this: app.NormalMessage,
+      sent: app.SentItem
+    ) {
+      return this.channel.send(sent)
+    }.bind(message)
+
+    message.sendTimeout = async function (
+      this: app.NormalMessage,
+      timeout: number,
+      sent: app.SentItem
+    ) {
+      const m = await this.channel.send(sent)
+      setTimeout(
+        function (this: app.NormalMessage) {
+          if (!this.deleted) this.delete().catch()
+        }.bind(this),
+        timeout
+      )
+      return m
+    }.bind(message)
+
+    message.isFromBotOwner = message.author.id === process.env.BOT_OWNER
 
     app.emitMessage(message.channel, message)
     app.emitMessage(message.author, message)
 
     if (app.isGuildMessage(message)) {
+      message.isFromGuildOwner =
+        message.isFromBotOwner || message.guild.ownerID === message.author.id
+
       app.emitMessage(message.guild, message)
       app.emitMessage(message.member, message)
     }
-
-    message.usedAsDefault = false
-
-    const prefix = await app.prefix(message.guild ?? undefined)
 
     let dynamicContent = message.content
 
@@ -84,7 +118,7 @@ const listener: app.Listener<"message"> = {
 
     const baseContent = dynamicContent
 
-    // parse CommandMessage arguments
+    // parse NormalMessage arguments
     const parsedArgs = yargsParser(dynamicContent)
     const restPositional = parsedArgs._.slice() ?? []
 
@@ -128,4 +162,4 @@ const listener: app.Listener<"message"> = {
   },
 }
 
-module.exports = listener
+export default listener
