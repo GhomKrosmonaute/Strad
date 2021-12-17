@@ -62,6 +62,6 @@ export default new app.Command({
       )
     }
 
-    return app.getChannel(message, "command").send(embed)
+    return app.getChannel(message, "command").send({ embeds: [embed] })
   },
 })

@@ -41,29 +41,33 @@ export default new app.Command({
         1
       )}**???-????-???**${key.key_face.slice(-1)}**`
 
-      return channel.send(
-        new app.MessageEmbed()
-          .setTitle(`Clé d'empreinte ${key.key_print}`)
-          .setDescription(
-            `Les informations concernant la clé d'empreinte \`${key.key_print}\` sont affichées ci-dessous.`
-          )
-          .setColor(key.recipient_id ? app.ALERT : app.VALID)
-          .addField("Apparence de la clé", keySimFace)
-          .addField("Créée par", `${keyOwner}, le ${key.creation_date}`)
-          .addField("Utilisée par", `${keyUser}${redeemDate}`)
-          .addField("Validité", validity)
-          .addField("Valeur", `${key.key_value} ${BLOCK}`)
-          .setFooter("Strad check <empreinte>")
-      )
+      return channel.send({
+        embeds: [
+          new app.MessageEmbed()
+            .setTitle(`Clé d'empreinte ${key.key_print}`)
+            .setDescription(
+              `Les informations concernant la clé d'empreinte \`${key.key_print}\` sont affichées ci-dessous.`
+            )
+            .setColor(key.recipient_id ? app.ALERT : app.VALID)
+            .addField("Apparence de la clé", keySimFace)
+            .addField("Créée par", `${keyOwner}, le ${key.creation_date}`)
+            .addField("Utilisée par", `${keyUser}${redeemDate}`)
+            .addField("Validité", validity)
+            .addField("Valeur", `${key.key_value} ${BLOCK}`)
+            .setFooter("Strad check <empreinte>"),
+        ],
+      })
     } else {
-      return channel.send(
-        new app.MessageEmbed()
-          .setTitle("Clé introuvable")
-          .setDescription(
-            `L'empreinte \`${message.args.key}\` n'est liée à aucune clé existante.\nFormat : \`XX-XXXX\`.`
-          )
-          .setColor(app.ALERT)
-      )
+      return channel.send({
+        embeds: [
+          new app.MessageEmbed()
+            .setTitle("Clé introuvable")
+            .setDescription(
+              `L'empreinte \`${message.args.key}\` n'est liée à aucune clé existante.\nFormat : \`XX-XXXX\`.`
+            )
+            .setColor(app.ALERT),
+        ],
+      })
     }
   },
 })

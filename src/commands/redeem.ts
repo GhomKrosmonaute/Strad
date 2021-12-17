@@ -45,45 +45,51 @@ export default new app.Command({
           })
           .where("id", message.author.id)
 
-        await channel.send(
-          new app.MessageEmbed()
-            .setTitle("Récupération réussie")
-            .setDescription(
-              `Youpi ! Tu viens de recevoir **${blockKey.key_value}** ${BLOCK} !`
-            )
-            .setColor(app.VALID)
-            .setFooter("Strad redeem <clé>")
-        )
+        await channel.send({
+          embeds: [
+            new app.MessageEmbed()
+              .setTitle("Récupération réussie")
+              .setDescription(
+                `Youpi ! Tu viens de recevoir **${blockKey.key_value}** ${BLOCK} !`
+              )
+              .setColor(app.VALID)
+              .setFooter("Strad redeem <clé>"),
+          ],
+        })
 
-        return app
-          .getChannel(message, "log")
-          .send(
+        return app.getChannel(message, "log").send({
+          embeds: [
             new app.MessageEmbed()
               .setTitle("Récupération de clé")
               .setDescription(
                 `${message.author} a utilisé la clé \`${message.args.key}\` d'une valeur de **${blockKey.key_value}** ${BLOCK}.`
               )
-              .setColor(app.NEUTRAL_BLUE)
-          )
+              .setColor(app.NEUTRAL_BLUE),
+          ],
+        })
       } else {
-        return channel.send(
+        return channel.send({
+          embeds: [
+            new app.MessageEmbed()
+              .setTitle("Récupération impossible")
+              .setDescription(
+                `La clé \`${message.args.key}\` a déjà été utilisée. En cas de litige, contacte un Mentor en message privé.`
+              )
+              .setColor(app.ALERT),
+          ],
+        })
+      }
+    } else {
+      return channel.send({
+        embeds: [
           new app.MessageEmbed()
             .setTitle("Récupération impossible")
             .setDescription(
-              `La clé \`${message.args.key}\` a déjà été utilisée. En cas de litige, contacte un Mentor en message privé.`
+              `La clé \`${message.args.key}\` n'est pas valide.\nFormat : \`XXXX-XXXX-XXXX-XXXX\`.`
             )
-            .setColor(app.ALERT)
-        )
-      }
-    } else {
-      return channel.send(
-        new app.MessageEmbed()
-          .setTitle("Récupération impossible")
-          .setDescription(
-            `La clé \`${message.args.key}\` n'est pas valide.\nFormat : \`XXXX-XXXX-XXXX-XXXX\`.`
-          )
-          .setColor(app.ALERT)
-      )
+            .setColor(app.ALERT),
+        ],
+      })
     }
   },
 })

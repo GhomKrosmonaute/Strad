@@ -1,10 +1,9 @@
 import discord from "discord.js"
 import yargsParser from "yargs-parser"
 import regexParser from "regex-parser"
-import emojiRegex from "emoji-regex/es2015/RGI_Emoji"
 
-import * as core from "./core"
-import * as command from "./command"
+import * as core from "./core.js"
+import * as command from "./command.js"
 
 export interface Argument {
   name: string
@@ -73,16 +72,24 @@ export interface Flag<Message extends command.NormalMessage>
 
 export function resolveGivenArgument<Message extends command.NormalMessage>(
   parsedArgs: yargsParser.Arguments,
-  arg: Option<Message> | Flag<Message>
-): { given: boolean; usedName: string; value: any } {
+  arg: Option<any> | Flag<any>
+): {
+  given: boolean
+  nameIsGiven: boolean
+  usedName: string
+  value: any
+} {
   let usedName = arg.name
-  let given = parsedArgs.hasOwnProperty(arg.name)
+  let nameIsGiven = parsedArgs.hasOwnProperty(arg.name)
+  let given =
+    parsedArgs[arg.name] !== undefined && parsedArgs[arg.name] !== null
   let value = parsedArgs[arg.name]
 
   if (!given && arg.aliases) {
     for (const alias of arg.aliases) {
       if (parsedArgs.hasOwnProperty(alias)) {
         usedName = alias
+        nameIsGiven = true
         given = true
         value = parsedArgs[alias]
         break
@@ -96,11 +103,11 @@ export function resolveGivenArgument<Message extends command.NormalMessage>(
     usedName = arg.flag
   }
 
-  return { given, usedName, value }
+  return { given, usedName, value, nameIsGiven }
 }
 
 export async function checkValue<Message extends command.NormalMessage>(
-  subject: Pick<Option<Message>, "checkValue" | "name">,
+  subject: Pick<Option<any>, "checkValue" | "name">,
   subjectType: "positional" | "argument",
   value: string,
   message: Message
@@ -109,7 +116,7 @@ export async function checkValue<Message extends command.NormalMessage>(
 
   if (Array.isArray(subject.checkValue)) {
     if (subject.checkValue.includes(value)) {
-      return new discord.MessageEmbed()
+      return new core.SafeMessageEmbed()
         .setColor("RED")
         .setAuthor(
           `Bad ${subjectType} pattern "${subject.name}".`,
@@ -128,7 +135,7 @@ export async function checkValue<Message extends command.NormalMessage>(
   )
 
   if (typeof checkResult === "string") {
-    return new discord.MessageEmbed()
+    return new core.SafeMessageEmbed()
       .setColor("RED")
       .setAuthor(
         `Bad ${subjectType} tested "${subject.name}".`,
@@ -139,7 +146,7 @@ export async function checkValue<Message extends command.NormalMessage>(
 
   if (typeof checkResult === "boolean") {
     if (!checkResult) {
-      return new discord.MessageEmbed()
+      return new core.SafeMessageEmbed()
         .setColor("RED")
         .setAuthor(
           `Bad ${subjectType} tested "${subject.name}".`,
@@ -162,7 +169,7 @@ export async function checkValue<Message extends command.NormalMessage>(
   }
 
   if (!checkResult.test(value)) {
-    return new discord.MessageEmbed()
+    return new core.SafeMessageEmbed()
       .setColor("RED")
       .setAuthor(
         `Bad ${subjectType} pattern "${subject.name}".`,
@@ -175,23 +182,23 @@ export async function checkValue<Message extends command.NormalMessage>(
 
 export async function checkCastedValue<Message extends command.NormalMessage>(
   subject: Pick<
-    Option<Message>,
+    Option<any>,
     "checkCastedValue" | "name" | "checkingErrorMessage"
   >,
   subjectType: "positional" | "argument",
-  value: string,
+  castedValue: any,
   message: Message
 ): Promise<discord.MessageEmbed | true> {
   if (!subject.checkCastedValue) return true
 
   const checkResult: string | boolean = await core.scrap(
     subject.checkCastedValue,
-    value,
+    castedValue,
     message
   )
 
   const errorEmbed = (errorMessage: string): discord.MessageEmbed => {
-    const embed = new discord.MessageEmbed()
+    const embed = new core.SafeMessageEmbed()
       .setColor("RED")
       .setAuthor(
         `Bad ${subjectType} tested "${subject.name}".`,
@@ -227,7 +234,7 @@ export async function checkCastedValue<Message extends command.NormalMessage>(
 }
 
 export async function castValue<Message extends command.NormalMessage>(
-  subject: Pick<Option<Message>, "castValue" | "name" | "castingErrorMessage">,
+  subject: Pick<Option<any>, "castValue" | "name" | "castingErrorMessage">,
   subjectType: "positional" | "argument",
   baseValue: string | undefined,
   message: Message,
@@ -303,11 +310,16 @@ export async function castValue<Message extends command.NormalMessage>(
             const match = /^(?:<@!?(\d+)>|(\d+))$/.exec(baseValue)
             if (match) {
               const id = match[1] ?? match[2]
-              const member = message.guild.members.cache.get(id)
+              const member = await message.guild.members.fetch({
+                user: id,
+                force: false,
+                cache: false,
+              })
               if (member) setValue(member)
               else throw new Error("Unknown member!")
             } else if (subject.castValue === "member+") {
-              const member = message.guild.members.cache.find((member) => {
+              const members = await message.guild.members.fetch()
+              const member = members.find((member) => {
                 return (
                   member.displayName
                     .toLowerCase()
@@ -337,7 +349,12 @@ export async function castValue<Message extends command.NormalMessage>(
             const channel = message.client.channels.cache.get(channelID)
             if (channel) {
               if (channel.isText()) {
-                setValue(await channel.messages.fetch(messageID, false))
+                setValue(
+                  await channel.messages.fetch(messageID, {
+                    force: false,
+                    cache: false,
+                  })
+                )
               } else throw new Error("Invalid channel type!")
             } else throw new Error("Unknown channel!")
           } else throw new Error("Invalid message link!")
@@ -349,7 +366,10 @@ export async function castValue<Message extends command.NormalMessage>(
           const match = /^(?:<@!?(\d+)>|(\d+))$/.exec(baseValue)
           if (match) {
             const id = match[1] ?? match[2]
-            const user = await message.client.users.fetch(id, false)
+            const user = await message.client.users.fetch(id, {
+              force: false,
+              cache: false,
+            })
             if (user) setValue(user)
             else throw new Error("Unknown user!")
           } else if (subject.castValue === "user+") {
@@ -370,11 +390,15 @@ export async function castValue<Message extends command.NormalMessage>(
             const match = /^(?:<@&?(\d+)>|(\d+))$/.exec(baseValue)
             if (match) {
               const id = match[1] ?? match[2]
-              const role = message.guild.roles.cache.get(id)
+              const role = await message.guild.roles.fetch(id)
               if (role) setValue(role)
               else throw new Error("Unknown role!")
             } else if (subject.castValue === "role+") {
-              const role = message.guild.roles.cache.find((role) => {
+              const roles = await message.guild.roles.fetch(undefined, {
+                cache: false,
+                force: false,
+              })
+              const role = roles.find((role) => {
                 return role.name.toLowerCase().includes(baseValue.toLowerCase())
               })
               if (role) setValue(role)
@@ -395,7 +419,7 @@ export async function castValue<Message extends command.NormalMessage>(
             if (emote) setValue(emote)
             else throw new Error("Unknown emote!")
           } else {
-            const emojiMatch = emojiRegex().exec(baseValue)
+            const emojiMatch = core.emojiRegex.exec(baseValue)
             if (emojiMatch) setValue(emojiMatch[0])
             else throw new Error("Invalid emote value!")
           }
@@ -404,7 +428,7 @@ export async function castValue<Message extends command.NormalMessage>(
       case "invite":
         if (baseValue) {
           if (command.isGuildMessage(message)) {
-            const invites = await message.guild.fetchInvites()
+            const invites = await message.guild.invites.fetch()
             const invite = invites.find(
               (invite) => invite.code === baseValue || invite.url === baseValue
             )
@@ -426,7 +450,7 @@ export async function castValue<Message extends command.NormalMessage>(
   try {
     await cast()
     return true
-  } catch (error) {
+  } catch (error: any) {
     const errorCode = core.code.stringify({
       content: `${error.name}: ${error.message}`,
       lang: "js",
@@ -434,7 +458,7 @@ export async function castValue<Message extends command.NormalMessage>(
 
     if (subject.castingErrorMessage) {
       if (typeof subject.castingErrorMessage === "string") {
-        return new discord.MessageEmbed()
+        return new core.SafeMessageEmbed()
           .setColor("RED")
           .setAuthor(
             `Bad ${subjectType} type "${subject.name}".`,
@@ -448,7 +472,7 @@ export async function castValue<Message extends command.NormalMessage>(
       }
     }
 
-    return new discord.MessageEmbed()
+    return new core.SafeMessageEmbed()
       .setColor("RED")
       .setAuthor(
         `Bad ${subjectType} type "${subject.name}".`,
@@ -464,9 +488,7 @@ export async function castValue<Message extends command.NormalMessage>(
   }
 }
 
-export function getTypeDescriptionOf<Message extends command.NormalMessage>(
-  arg: Option<Message>
-) {
+export function getTypeDescriptionOf(arg: Option<any>) {
   if (arg.typeDescription) return arg.typeDescription
   if (!arg.castValue) return "string"
   if (typeof arg.castValue === "string") {

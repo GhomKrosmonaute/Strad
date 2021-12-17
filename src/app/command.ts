@@ -5,17 +5,18 @@ import tims from "tims"
 import path from "path"
 import yargsParser from "yargs-parser"
 
-import * as core from "./core"
-import * as logger from "./logger"
-import * as handler from "./handler"
-import * as argument from "./argument"
+import * as core from "./core.js"
+import * as logger from "./logger.js"
+import * as handler from "./handler.js"
+import * as argument from "./argument.js"
 
 export const commandHandler = new handler.Handler(
   process.env.BOT_COMMANDS_PATH ?? path.join(process.cwd(), "dist", "commands")
 )
 
 commandHandler.on("load", async (filepath) => {
-  const file = await import(filepath)
+  const file = await import("file://" + filepath)
+  if (filepath.endsWith(".native.js")) file.default.options.native = true
   return commands.add(file.default)
 })
 
@@ -23,9 +24,9 @@ export let defaultCommand: Command<any> | null = null
 
 export const commands = new (class CommandCollection extends discord.Collection<
   string,
-  Command<keyof NormalMessageType>
+  Command<keyof CommandMessageType>
 > {
-  public resolve(key: string): Command<keyof NormalMessageType> | undefined {
+  public resolve(key: string): Command<keyof CommandMessageType> | undefined {
     for (const [name, command] of this) {
       if (
         key === name ||
@@ -35,16 +36,13 @@ export const commands = new (class CommandCollection extends discord.Collection<
     }
   }
 
-  public add(command: Command<keyof NormalMessageType>) {
+  public add(command: Command<keyof CommandMessageType>) {
     validateCommand(command)
     this.set(command.options.name, command)
   }
 })()
 
-export type SentItem =
-  | discord.APIMessageContentResolvable
-  | (discord.MessageOptions & { split?: false })
-  | discord.MessageAdditions
+export type SentItem = string | discord.MessagePayload | discord.MessageOptions
 
 export type NormalMessage = discord.Message & {
   args: { [name: string]: any } & any[]
@@ -83,18 +81,18 @@ export interface MiddlewareResult {
   data: any
 }
 
-export type Middleware<Type extends keyof NormalMessageType> = (
-  message: NormalMessageType[Type],
+export type Middleware<Type extends keyof CommandMessageType> = (
+  message: CommandMessageType[Type],
   data: any
 ) => Promise<MiddlewareResult> | MiddlewareResult
 
-export interface NormalMessageType {
+export interface CommandMessageType {
   guild: GuildMessage
   dm: DirectMessage
   all: NormalMessage
 }
 
-export interface CommandOptions<Type extends keyof NormalMessageType> {
+export interface CommandOptions<Type extends keyof CommandMessageType> {
   channelType?: Type
 
   name: string
@@ -105,7 +103,7 @@ export interface CommandOptions<Type extends keyof NormalMessageType> {
   /**
    * Description displayed in command detail
    */
-  longDescription?: core.Scrap<string, [message: NormalMessageType[Type]]>
+  longDescription?: core.Scrap<string, [message: CommandMessageType[Type]]>
   /**
    * Use this command if prefix is given but without command matching
    */
@@ -118,19 +116,19 @@ export interface CommandOptions<Type extends keyof NormalMessageType> {
   /**
    * Cool down of command (in ms)
    */
-  coolDown?: core.Scrap<number, [message: NormalMessageType[Type]]>
-  examples?: core.Scrap<string[], [message: NormalMessageType[Type]]>
+  coolDown?: core.Scrap<number, [message: CommandMessageType[Type]]>
+  examples?: core.Scrap<string[], [message: CommandMessageType[Type]]>
 
   // Restriction flags and permissions
-  guildOwnerOnly?: core.Scrap<boolean, [message: NormalMessageType[Type]]>
-  botOwnerOnly?: core.Scrap<boolean, [message: NormalMessageType[Type]]>
+  guildOwnerOnly?: core.Scrap<boolean, [message: CommandMessageType[Type]]>
+  botOwnerOnly?: core.Scrap<boolean, [message: CommandMessageType[Type]]>
   userPermissions?: core.Scrap<
     discord.PermissionString[],
-    [message: NormalMessageType[Type]]
+    [message: CommandMessageType[Type]]
   >
   botPermissions?: core.Scrap<
     discord.PermissionString[],
-    [message: NormalMessageType[Type]]
+    [message: CommandMessageType[Type]]
   >
 
   roles?: core.Scrap<
@@ -140,7 +138,7 @@ export interface CommandOptions<Type extends keyof NormalMessageType> {
       | [discord.RoleResolvable]
       | [discord.RoleResolvable[]]
     )[],
-    [message: NormalMessageType[Type]]
+    [message: CommandMessageType[Type]]
   >
 
   /**
@@ -151,20 +149,20 @@ export interface CommandOptions<Type extends keyof NormalMessageType> {
   /**
    * The rest of message after excludes all other arguments.
    */
-  rest?: argument.Rest<NormalMessageType[Type]>
+  rest?: argument.Rest<CommandMessageType[Type]>
   /**
    * Yargs positional argument (e.g. `[arg] <arg>`)
    */
-  positional?: argument.Positional<NormalMessageType[Type]>[]
+  positional?: argument.Positional<CommandMessageType[Type]>[]
   /**
    * Yargs option arguments (e.g. `--myArgument=value`)
    */
-  options?: argument.Option<NormalMessageType[Type]>[]
+  options?: argument.Option<CommandMessageType[Type]>[]
   /**
    * Yargs flag arguments (e.g. `--myFlag -f`)
    */
-  flags?: argument.Flag<NormalMessageType[Type]>[]
-  run: (this: Command<Type>, message: NormalMessageType[Type]) => unknown
+  flags?: argument.Flag<CommandMessageType[Type]>[]
+  run: (this: Command<Type>, message: CommandMessageType[Type]) => unknown
   /**
    * Sub-commands
    */
@@ -177,18 +175,23 @@ export interface CommandOptions<Type extends keyof NormalMessageType> {
    * This property is automatically setup on bot running.
    * @deprecated
    */
-  parent?: Command<keyof NormalMessageType>
+  parent?: Command<keyof CommandMessageType>
+  /**
+   * This property is automatically setup on bot running.
+   * @deprecated
+   */
+  native?: boolean
 }
 
-export class Command<Type extends keyof NormalMessageType = "all"> {
+export class Command<Type extends keyof CommandMessageType = "all"> {
   constructor(public options: CommandOptions<Type>) {}
 }
 
 export function validateCommand<
-  Type extends keyof NormalMessageType = keyof NormalMessageType
+  Type extends keyof CommandMessageType = keyof CommandMessageType
 >(
   command: Command<Type>,
-  parent?: Command<keyof NormalMessageType>
+  parent?: Command<keyof CommandMessageType>
 ): void | never {
   command.options.parent = parent
 
@@ -200,12 +203,12 @@ export function validateCommand<
         )} command wants to be a default command but the ${chalk.blueBright(
           defaultCommand.options.name
         )} command is already the default command`,
-        "handler"
+        "command:validateCommand"
       )
     else defaultCommand = command
   }
 
-  const help: argument.Flag<NormalMessageType[Type]> = {
+  const help: argument.Flag<CommandMessageType[Type]> = {
     name: "help",
     flag: "h",
     description: "Get help from the command",
@@ -229,12 +232,13 @@ export function validateCommand<
         `you forgot using ${chalk.greenBright(
           "message.triggerCoolDown()"
         )} in the ${chalk.blueBright(command.options.name)} command.`,
-        "handler"
+        "command:validateCommand"
       )
 
   logger.log(
-    `loaded command ${chalk.blueBright(commandBreadcrumb(command))}`,
-    "handler"
+    `loaded command ${chalk.blueBright(commandBreadcrumb(command))}${
+      command.options.native ? ` ${chalk.green("native")}` : ""
+    } ${chalk.grey(command.options.description)}`
   )
 
   if (command.options.subs)
@@ -242,7 +246,7 @@ export function validateCommand<
       validateCommand(sub as any, command as Command<any>)
 }
 
-export function commandBreadcrumb<Type extends keyof NormalMessageType>(
+export function commandBreadcrumb<Type extends keyof CommandMessageType>(
   command: Command<Type>,
   separator = " "
 ): string {
@@ -252,7 +256,7 @@ export function commandBreadcrumb<Type extends keyof NormalMessageType>(
     .join(separator)
 }
 
-export function commandParents<Type extends keyof NormalMessageType>(
+export function commandParents<Type extends keyof CommandMessageType>(
   command: Command<Type>
 ): Command<any>[] {
   return command.options.parent
@@ -260,8 +264,8 @@ export function commandParents<Type extends keyof NormalMessageType>(
     : [command]
 }
 
-export async function prepareCommand<Type extends keyof NormalMessageType>(
-  message: NormalMessageType[Type],
+export async function prepareCommand<Type extends keyof CommandMessageType>(
+  message: CommandMessageType[Type],
   cmd: Command<Type>,
   context?: {
     restPositional: string[]
@@ -294,7 +298,7 @@ export async function prepareCommand<Type extends keyof NormalMessageType>(
           trigger: false,
         })
       } else {
-        return new discord.MessageEmbed()
+        return new core.SafeMessageEmbed()
           .setColor("RED")
           .setAuthor(
             `Please wait ${Math.ceil(
@@ -308,7 +312,7 @@ export async function prepareCommand<Type extends keyof NormalMessageType>(
     message.triggerCoolDown = () => {
       logger.warn(
         `You must setup the cooldown of the "${cmd.options.name}" command before using the "triggerCoolDown" method`,
-        "system"
+        "command:prepareCommand"
       )
     }
   }
@@ -317,7 +321,7 @@ export async function prepareCommand<Type extends keyof NormalMessageType>(
 
   if (isGuildMessage(message)) {
     if (channelType === "dm")
-      return new discord.MessageEmbed()
+      return new core.SafeMessageEmbed()
         .setColor("RED")
         .setAuthor(
           "This command must be used in DM.",
@@ -326,10 +330,10 @@ export async function prepareCommand<Type extends keyof NormalMessageType>(
 
     if (core.scrap(cmd.options.guildOwnerOnly, message))
       if (
-        message.guild.owner !== message.member &&
+        message.guild.ownerId !== message.member.id &&
         process.env.BOT_OWNER !== message.member.id
       )
-        return new discord.MessageEmbed()
+        return new core.SafeMessageEmbed()
           .setColor("RED")
           .setAuthor(
             "You must be the guild owner.",
@@ -343,13 +347,8 @@ export async function prepareCommand<Type extends keyof NormalMessageType>(
       )
 
       for (const permission of botPermissions)
-        if (
-          !message.guild.me?.hasPermission(permission, {
-            checkAdmin: true,
-            checkOwner: true,
-          })
-        )
-          return new discord.MessageEmbed()
+        if (!message.guild.me?.permissions.has(permission, true))
+          return new core.SafeMessageEmbed()
             .setColor("RED")
             .setAuthor("Oops!", message.client.user.displayAvatarURL())
             .setDescription(
@@ -364,13 +363,8 @@ export async function prepareCommand<Type extends keyof NormalMessageType>(
       )
 
       for (const permission of userPermissions)
-        if (
-          !message.member.hasPermission(permission, {
-            checkAdmin: true,
-            checkOwner: true,
-          })
-        )
-          return new discord.MessageEmbed()
+        if (!message.member.permissions.has(permission, true))
+          return new core.SafeMessageEmbed()
             .setColor("RED")
             .setAuthor("Oops!", message.client.user.displayAvatarURL())
             .setDescription(
@@ -396,7 +390,7 @@ export async function prepareCommand<Type extends keyof NormalMessageType>(
           const id = getRoleId(roleCond)
 
           if (!member.roles.cache.has(id)) {
-            return new discord.MessageEmbed()
+            return new core.SafeMessageEmbed()
               .setColor("RED")
               .setAuthor("Oops!", message.client.user.displayAvatarURL())
               .setDescription(
@@ -410,7 +404,7 @@ export async function prepareCommand<Type extends keyof NormalMessageType>(
               const id = getRoleId(_roleCond)
 
               if (member.roles.cache.has(id)) {
-                return new discord.MessageEmbed()
+                return new core.SafeMessageEmbed()
                   .setColor("RED")
                   .setAuthor("Oops!", message.client.user.displayAvatarURL())
                   .setDescription(
@@ -420,7 +414,7 @@ export async function prepareCommand<Type extends keyof NormalMessageType>(
             } else {
               for (const role of _roleCond) {
                 if (member.roles.cache.has(getRoleId(role))) {
-                  return new discord.MessageEmbed()
+                  return new core.SafeMessageEmbed()
                     .setColor("RED")
                     .setAuthor("Oops!", message.client.user.displayAvatarURL())
                     .setDescription(
@@ -440,7 +434,7 @@ export async function prepareCommand<Type extends keyof NormalMessageType>(
                   `Bad command.roles structure in ${chalk.bold(
                     commandBreadcrumb(cmd, "/")
                   )} command.`,
-                  "handler"
+                  "command:prepareCommand"
                 )
               } else {
                 const id = getRoleId(role)
@@ -453,7 +447,7 @@ export async function prepareCommand<Type extends keyof NormalMessageType>(
             }
 
             if (!someRoleGiven)
-              return new discord.MessageEmbed()
+              return new core.SafeMessageEmbed()
                 .setColor("RED")
                 .setAuthor("Oops!", message.client.user.displayAvatarURL())
                 .setDescription(
@@ -475,7 +469,7 @@ export async function prepareCommand<Type extends keyof NormalMessageType>(
 
   if (channelType === "guild")
     if (isDirectMessage(message))
-      return new discord.MessageEmbed()
+      return new core.SafeMessageEmbed()
         .setColor("RED")
         .setAuthor(
           "This command must be used in a guild.",
@@ -484,7 +478,7 @@ export async function prepareCommand<Type extends keyof NormalMessageType>(
 
   if (await core.scrap(cmd.options.botOwnerOnly, message))
     if (process.env.BOT_OWNER !== message.author.id)
-      return new discord.MessageEmbed()
+      return new core.SafeMessageEmbed()
         .setColor("RED")
         .setAuthor(
           "You must be my owner.",
@@ -497,8 +491,8 @@ export async function prepareCommand<Type extends keyof NormalMessageType>(
 
       for (const positional of positionalList) {
         const index = positionalList.indexOf(positional)
-        let value = context.parsedArgs._[index]
-        const given = value !== undefined
+        let value: any = context.parsedArgs._[index]
+        const given = value !== undefined && value !== null
 
         const set = (v: any) => {
           message.args[positional.name] = v
@@ -514,7 +508,7 @@ export async function prepareCommand<Type extends keyof NormalMessageType>(
           if (await core.scrap(positional.required, message)) {
             if (positional.missingErrorMessage) {
               if (typeof positional.missingErrorMessage === "string") {
-                return new discord.MessageEmbed()
+                return new core.SafeMessageEmbed()
                   .setColor("RED")
                   .setAuthor(
                     `Missing positional "${positional.name}"`,
@@ -526,7 +520,7 @@ export async function prepareCommand<Type extends keyof NormalMessageType>(
               }
             }
 
-            return new discord.MessageEmbed()
+            return new core.SafeMessageEmbed()
               .setColor("RED")
               .setAuthor(
                 `Missing positional "${positional.name}"`,
@@ -572,7 +566,7 @@ export async function prepareCommand<Type extends keyof NormalMessageType>(
         if (value !== null && positional.checkCastedValue) {
           const checked = await argument.checkCastedValue(
             positional,
-            "argument",
+            "positional",
             value,
             message
           )
@@ -600,13 +594,13 @@ export async function prepareCommand<Type extends keyof NormalMessageType>(
 
         if (value === true) value = undefined
 
-        if ((await core.scrap(option.required, message)) && !given) {
+        if (!given && (await core.scrap(option.required, message))) {
           if (option.missingErrorMessage) {
             if (typeof option.missingErrorMessage === "string") {
-              return new discord.MessageEmbed()
+              return new core.SafeMessageEmbed()
                 .setColor("RED")
                 .setAuthor(
-                  `Missing argument "${option.name}"`,
+                  `Missing option "${option.name}"`,
                   message.client.user.displayAvatarURL()
                 )
                 .setDescription(option.missingErrorMessage)
@@ -615,10 +609,10 @@ export async function prepareCommand<Type extends keyof NormalMessageType>(
             }
           }
 
-          return new discord.MessageEmbed()
+          return new core.SafeMessageEmbed()
             .setColor("RED")
             .setAuthor(
-              `Missing argument "${option.name}"`,
+              `Missing option "${option.name}"`,
               message.client.user.displayAvatarURL()
             )
             .setDescription(
@@ -674,7 +668,7 @@ export async function prepareCommand<Type extends keyof NormalMessageType>(
 
     if (cmd.options.flags) {
       for (const flag of cmd.options.flags) {
-        let { given, value } = argument.resolveGivenArgument(
+        let { given, nameIsGiven, value } = argument.resolveGivenArgument(
           context.parsedArgs,
           flag
         )
@@ -684,7 +678,7 @@ export async function prepareCommand<Type extends keyof NormalMessageType>(
           value = v
         }
 
-        if (!given) set(false)
+        if (!nameIsGiven) set(false)
         else if (typeof value === "boolean") set(value)
         else if (/^(?:true|1|on|yes|oui)$/.test(value)) set(true)
         else if (/^(?:false|0|off|no|non)$/.test(value)) set(false)
@@ -706,7 +700,7 @@ export async function prepareCommand<Type extends keyof NormalMessageType>(
         if (await core.scrap(rest.required, message)) {
           if (rest.missingErrorMessage) {
             if (typeof rest.missingErrorMessage === "string") {
-              return new discord.MessageEmbed()
+              return new core.SafeMessageEmbed()
                 .setColor("RED")
                 .setAuthor(
                   `Missing rest "${rest.name}"`,
@@ -718,7 +712,7 @@ export async function prepareCommand<Type extends keyof NormalMessageType>(
             }
           }
 
-          return new discord.MessageEmbed()
+          return new core.SafeMessageEmbed()
             .setColor("RED")
             .setAuthor(
               `Missing rest "${rest.name}"`,
@@ -751,7 +745,7 @@ export async function prepareCommand<Type extends keyof NormalMessageType>(
       }
 
       if (typeof result === "string")
-        return new discord.MessageEmbed()
+        return new core.SafeMessageEmbed()
           .setColor("RED")
           .setAuthor(
             `${
@@ -768,8 +762,8 @@ export async function prepareCommand<Type extends keyof NormalMessageType>(
   return true
 }
 
-export async function sendCommandDetails<Type extends keyof NormalMessageType>(
-  message: NormalMessageType[Type],
+export async function sendCommandDetails<Type extends keyof CommandMessageType>(
+  message: CommandMessageType[Type],
   cmd: Command<Type>
 ): Promise<void> {
   let pattern = `${message.usedPrefix}${
@@ -844,8 +838,8 @@ export async function sendCommandDetails<Type extends keyof NormalMessageType>(
   if (await core.scrap(cmd.options.guildOwnerOnly, message))
     specialPermissions.push("GUILD_OWNER")
 
-  const embed = new discord.MessageEmbed()
-    .setColor("BLURPLE")
+  const embed = new core.SafeMessageEmbed()
+    .setColor()
     .setAuthor("Command details", message.client.user.displayAvatarURL())
     .setTitle(
       `${pattern} ${[...positionalList, restPattern, ...flagList].join(" ")} ${
@@ -867,6 +861,16 @@ export async function sendCommandDetails<Type extends keyof NormalMessageType>(
     embed.addField(
       "aliases",
       aliases.map((alias) => `\`${alias}\``).join(", "),
+      true
+    )
+  }
+
+  if (cmd.options.middlewares) {
+    embed.addField(
+      "middlewares:",
+      cmd.options.middlewares
+        .map((middleware) => `*${middleware.name || "Anonymous"}*`)
+        .join(" → "),
       true
     )
   }
@@ -935,11 +939,11 @@ export async function sendCommandDetails<Type extends keyof NormalMessageType>(
       `This command can only be sent in ${cmd.options.channelType} channel.`
     )
 
-  await message.channel.send(embed)
+  await message.channel.send({ embeds: [embed] })
 }
 
-export function commandToListItem<Type extends keyof NormalMessageType>(
-  message: NormalMessageType[Type],
+export function commandToListItem<Type extends keyof CommandMessageType>(
+  message: CommandMessageType[Type],
   cmd: Command<Type>
 ): string {
   return `**${message.usedPrefix}${commandBreadcrumb(cmd, " ")}** - ${
@@ -948,13 +952,13 @@ export function commandToListItem<Type extends keyof NormalMessageType>(
 }
 
 export function isNormalMessage(
-  message: discord.Message
+  message: discord.Message | discord.PartialMessage
 ): message is NormalMessage {
   return (
     !message.system &&
     !!message.channel &&
     !!message.author &&
-    !message.webhookID
+    !message.webhookId
   )
 }
 

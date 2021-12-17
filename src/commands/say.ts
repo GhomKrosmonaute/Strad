@@ -22,14 +22,14 @@ export default new app.Command({
       .first()
 
     if (!sayItem || sayItem.amount < 1)
-      return app
-        .getChannel(message, "command")
-        .send(
+      return app.getChannel(message, "command").send({
+        embeds: [
           new app.MessageEmbed()
             .setTitle("Boutique")
             .setDescription("Pour avoir accès à ça, fais `Strad shop` !")
-            .setColor(app.SHOP)
-        )
+            .setColor(app.SHOP),
+        ],
+      })
 
     await message.channel.send(message.args.text)
 
@@ -40,15 +40,15 @@ export default new app.Command({
       .where("user_id", message.author.id)
       .and.where("item_id", 2)
 
-    return app
-      .getChannel(message, "log")
-      .send(
+    return app.getChannel(message, "log").send({
+      embeds: [
         new app.MessageEmbed()
           .setTitle("Strad say")
           .setDescription(
             `${message.author} a envoyé un message via Strad : "${message.args.text}"`
           )
-          .setColor(app.NEUTRAL_BLUE)
-      )
+          .setColor(app.NEUTRAL_BLUE),
+      ],
+    })
   },
 })

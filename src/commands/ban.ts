@@ -31,7 +31,7 @@ export default new app.Command({
       )
       .setColor(app.ALERT)
 
-    await app.getChannel(message, "log").send(embed)
+    await app.getChannel(message, "log").send({ embeds: [embed] })
     return app.sendThenDelete(app.getChannel(message, "command"), embed)
   },
 })

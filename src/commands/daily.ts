@@ -55,37 +55,41 @@ export default new app.Command({
         })
         .where("id", message.author.id)
 
-      return channel.send(
-        new app.MessageEmbed()
-          .setAuthor(
-            `Récompense quotidienne (${message.member.displayName})`,
-            message.author.displayAvatarURL({ dynamic: true })
-          )
-          .setColor(app.VALID)
-          .addField("Blocs", `+ **${finalBlockReward}** ${BLOCK}`, true)
-          .addField("Créas", `+ **${finalCreaReward}** ${CREA}`, true)
-          .setDescription(
-            `Voici ta récompense journalière ! Pour accéder à ton compte, fais \`Strad rank\`.
+      return channel.send({
+        embeds: [
+          new app.MessageEmbed()
+            .setAuthor(
+              `Récompense quotidienne (${message.member.displayName})`,
+              message.author.displayAvatarURL({ dynamic: true })
+            )
+            .setColor(app.VALID)
+            .addField("Blocs", `+ **${finalBlockReward}** ${BLOCK}`, true)
+            .addField("Créas", `+ **${finalCreaReward}** ${CREA}`, true)
+            .setDescription(
+              `Voici ta récompense journalière ! Pour accéder à ton compte, fais \`Strad rank\`.
         **${upvotes}** ${UPVOTE} • **${downvotes}** ${DOWNVOTE} • **${downloads}** ${DOWNLOAD}`
-          )
-          .setFooter("Strad daily")
-      )
+            )
+            .setFooter("Strad daily"),
+        ],
+      })
     } else {
-      return channel.send(
-        new app.MessageEmbed()
-          .setAuthor(
-            `Récompense quotidienne (${message.member.displayName})`,
-            message.author.displayAvatarURL({ dynamic: true })
-          )
-          .setColor(app.ALERT)
-          .setDescription(
-            `Tu as déjà obtenu ta récompense aujourd'hui. Récupère-la ${app
-              .dayjs()
-              .endOf("day")
-              .fromNow()} !`
-          )
-          .setFooter("Strad daily")
-      )
+      return channel.send({
+        embeds: [
+          new app.MessageEmbed()
+            .setAuthor(
+              `Récompense quotidienne (${message.member.displayName})`,
+              message.author.displayAvatarURL({ dynamic: true })
+            )
+            .setColor(app.ALERT)
+            .setDescription(
+              `Tu as déjà obtenu ta récompense aujourd'hui. Récupère-la ${app
+                .dayjs()
+                .endOf("day")
+                .fromNow()} !`
+            )
+            .setFooter("Strad daily"),
+        ],
+      })
     }
   },
 })

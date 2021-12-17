@@ -36,69 +36,81 @@ export default new app.Command({
     const money = result?.money ?? 0
 
     if (!item)
-      return channel.send(
-        new app.MessageEmbed()
-          .setTitle("Achat impossible")
-          .setDescription("Cet article est introuvable.")
-          .setColor(app.ALERT)
-      )
+      return channel.send({
+        embeds: [
+          new app.MessageEmbed()
+            .setTitle("Achat impossible")
+            .setDescription("Cet article est introuvable.")
+            .setColor(app.ALERT),
+        ],
+      })
 
     const priceAfterDiscount = Math.round(
       item.price - item.price * (item.discount / 100)
     )
 
     if (!item.is_buyable)
-      return channel.send(
-        new app.MessageEmbed()
-          .setTitle("Achat impossible")
-          .setDescription("Cet article n'est pas à vendre.")
-          .setColor(app.ALERT)
-      )
+      return channel.send({
+        embeds: [
+          new app.MessageEmbed()
+            .setTitle("Achat impossible")
+            .setDescription("Cet article n'est pas à vendre.")
+            .setColor(app.ALERT),
+        ],
+      })
 
     if (item.quantity >= 0 && item.quantity < item.buy_amount)
-      return channel.send(
-        new app.MessageEmbed()
-          .setTitle("Achat impossible")
-          .setDescription(
-            `Il ne reste plus assez de stocks pour acheter **${item.buy_amount} x ${item.name}**.`
-          )
-          .setColor(app.ALERT)
-      )
+      return channel.send({
+        embeds: [
+          new app.MessageEmbed()
+            .setTitle("Achat impossible")
+            .setDescription(
+              `Il ne reste plus assez de stocks pour acheter **${item.buy_amount} x ${item.name}**.`
+            )
+            .setColor(app.ALERT),
+        ],
+      })
 
     if (money < priceAfterDiscount)
-      return channel.send(
-        new app.MessageEmbed()
-          .setTitle("Achat impossible")
-          .setDescription(
-            `Tu n'as pas assez d'argent pour acheter **${item.buy_amount} x ${
-              item.name
-            }**. Il te manque encore ${priceAfterDiscount - money} ${BLOCK} !`
-          )
-          .setColor(app.ALERT)
-      )
+      return channel.send({
+        embeds: [
+          new app.MessageEmbed()
+            .setTitle("Achat impossible")
+            .setDescription(
+              `Tu n'as pas assez d'argent pour acheter **${item.buy_amount} x ${
+                item.name
+              }**. Il te manque encore ${priceAfterDiscount - money} ${BLOCK} !`
+            )
+            .setColor(app.ALERT),
+        ],
+      })
 
     // Demande de confirmation
 
-    await channel.send(
-      new app.MessageEmbed()
-        .setTitle("Confirmation d'achat")
-        .setDescription(
-          `${message.member}, acheter **${item.buy_amount} x ${item.name}** pour **${priceAfterDiscount}** ${BLOCK} ?`
-        )
-        .setColor(app.SHOP)
-        .setFooter('Envoie "Oui" ou "Non"')
-    )
+    await channel.send({
+      embeds: [
+        new app.MessageEmbed()
+          .setTitle("Confirmation d'achat")
+          .setDescription(
+            `${message.member}, acheter **${item.buy_amount} x ${item.name}** pour **${priceAfterDiscount}** ${BLOCK} ?`
+          )
+          .setColor(app.SHOP)
+          .setFooter('Envoie "Oui" ou "Non"'),
+      ],
+    })
 
     app.onceMessage(message.member, async (message) => {
       message.delete().catch()
 
       if (message.content.toLowerCase() !== "oui")
-        return channel.send(
-          new app.MessageEmbed()
-            .setTitle("Achat annulé")
-            .setDescription("La transaction a été annulée.")
-            .setColor(app.ALERT)
-        )
+        return channel.send({
+          embeds: [
+            new app.MessageEmbed()
+              .setTitle("Achat annulé")
+              .setDescription("La transaction a été annulée.")
+              .setColor(app.ALERT),
+          ],
+        })
 
       // Prélèvement de l'argent sur le compte de l'utilisateur
       await users.query
@@ -126,15 +138,17 @@ export default new app.Command({
             amount: item.buy_amount,
           }))
 
-      channel.send(
-        new app.MessageEmbed()
-          .setTitle("Achat réussi")
-          .setDescription(
-            `Tu as acheté **${item.buy_amount} x ${item.name}** pour **${priceAfterDiscount}** ${BLOCK} !`
-          )
-          .setColor(app.VALID)
-          .setFooter('Tape "Strad rank" pour accéder à ton inventaire')
-      )
+      channel.send({
+        embeds: [
+          new app.MessageEmbed()
+            .setTitle("Achat réussi")
+            .setDescription(
+              `Tu as acheté **${item.buy_amount} x ${item.name}** pour **${priceAfterDiscount}** ${BLOCK} !`
+            )
+            .setColor(app.VALID)
+            .setFooter('Tape "Strad rank" pour accéder à ton inventaire'),
+        ],
+      })
 
       if (item.quantity !== -1) {
         await items.query

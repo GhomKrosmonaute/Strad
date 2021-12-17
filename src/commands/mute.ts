@@ -34,28 +34,28 @@ export default new app.Command({
     const reason: string = message.args.reason
 
     if (duration < 1 || duration > 360)
-      return app
-        .getChannel(message, "command")
-        .send(
+      return app.getChannel(message, "command").send({
+        embeds: [
           new app.MessageEmbed()
             .setTitle("Durée non conforme")
             .setDescription(
               "La durée doit être comprise entre 1 et 360 minutes (6 heures). Utilisation : `Strad mute <@membre> <durée en minutes> <raison>`."
             )
-            .setColor(app.ALERT)
-        )
+            .setColor(app.ALERT),
+        ],
+      })
 
     if (reason.length < 10)
-      return app
-        .getChannel(message, "command")
-        .send(
+      return app.getChannel(message, "command").send({
+        embeds: [
           new app.MessageEmbed()
             .setTitle("Raison insuffisante")
             .setDescription(
               "La raison doit contenir au moins 10 caractères. Utilisation : `Strad mute <@membre> <durée en minutes> <raison>`."
             )
-            .setColor(app.ALERT)
-        )
+            .setColor(app.ALERT),
+        ],
+      })
 
     await member.roles.add(role, `${reason} • ${duration} minute(s)`)
 
@@ -66,7 +66,7 @@ export default new app.Command({
       )
       .setColor(app.ALERT)
 
-    await app.getChannel(message, "log").send(embed)
+    await app.getChannel(message, "log").send({ embeds: [embed] })
     await app.sendThenDelete(app.getChannel(message, "command"), embed)
 
     setTimeout(

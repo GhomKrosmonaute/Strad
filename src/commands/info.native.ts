@@ -1,9 +1,9 @@
-import * as app from "../app"
+import * as app from "../app.js"
 
 import tims from "tims"
-import path from "path"
+import * as core from "../app/core.js"
 
-const conf = require(path.join(process.cwd(), "package.json"))
+const conf = app.fetchPackageJson()
 
 export default new app.Command({
   name: "info",
@@ -17,8 +17,8 @@ export default new app.Command({
     },
   ],
   async run(message) {
-    const embed = new app.MessageEmbed()
-      .setColor("BLURPLE")
+    const embed = new core.SafeMessageEmbed()
+      .setColor()
       .setAuthor(
         `Information about ${message.client.user.tag}`,
         message.client.user?.displayAvatarURL({ dynamic: true })
@@ -70,35 +70,37 @@ export default new app.Command({
         }),
         true
       )
-    return message.channel.send(
-      !message.args.dependencies
-        ? embed
-        : embed
-            .addField("\u200B", "\u200B", false)
-            .addField(
-              "Dependencies",
-              app.code.stringify({
-                lang: "yml",
-                content: Object.entries(conf.dependencies)
-                  .map(([name, version]) => {
-                    return `${name.replace(/@/g, "")}: ${version}`
-                  })
-                  .join("\n"),
-              }),
-              true
-            )
-            .addField(
-              "Dev dependencies",
-              app.code.stringify({
-                lang: "yml",
-                content: Object.entries(conf.devDependencies)
-                  .map(([name, version]) => {
-                    return `${name.replace(/@/g, "")}: ${version}`
-                  })
-                  .join("\n"),
-              }),
-              true
-            )
-    )
+    return message.channel.send({
+      embeds: [
+        !message.args.dependencies
+          ? embed
+          : embed
+              .addField("\u200B", "\u200B", false)
+              .addField(
+                "Dependencies",
+                app.code.stringify({
+                  lang: "yml",
+                  content: Object.entries(conf.dependencies)
+                    .map(([name, version]) => {
+                      return `${name.replace(/@/g, "")}: ${version}`
+                    })
+                    .join("\n"),
+                }),
+                true
+              )
+              .addField(
+                "Dev dependencies",
+                app.code.stringify({
+                  lang: "yml",
+                  content: Object.entries(conf.devDependencies)
+                    .map(([name, version]) => {
+                      return `${name.replace(/@/g, "")}: ${version}`
+                    })
+                    .join("\n"),
+                }),
+                true
+              ),
+      ],
+    })
   },
 })

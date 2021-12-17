@@ -36,20 +36,22 @@ export default new app.Command({
 
     const userRank = userRanking.indexOf(user) + 1
 
-    return app.getChannel(message, "command").send(
-      new app.MessageEmbed()
-        .setAuthor(
-          message.author.tag,
-          message.author.displayAvatarURL({ dynamic: true })
-        )
-        .setThumbnail(message.author.displayAvatarURL({ dynamic: true }))
-        .addField("Valeur du compte", `${user.money} ${BLOCK}`, true)
-        .addField("Nombre de Créas", `${user.crea_amount} ${CREA}`, true)
-        .addField("Rang", `#${userRank}`, true)
-        .addField("Titre artistique", user.rank, true)
-        .addField("Inventaire", userInventory)
-        .setFooter("Strad rank")
-        .setColor(message.member.displayColor)
-    )
+    return app.getChannel(message, "command").send({
+      embeds: [
+        new app.MessageEmbed()
+          .setAuthor(
+            message.author.tag,
+            message.author.displayAvatarURL({ dynamic: true })
+          )
+          .setThumbnail(message.author.displayAvatarURL({ dynamic: true }))
+          .addField("Valeur du compte", `${user.money} ${BLOCK}`, true)
+          .addField("Nombre de Créas", `${user.crea_amount} ${CREA}`, true)
+          .addField("Rang", `#${userRank}`, true)
+          .addField("Titre artistique", user.rank ?? "*Aucun titre*", true)
+          .addField("Inventaire", userInventory)
+          .setFooter("Strad rank")
+          .setColor(message.member.displayColor),
+      ],
+    })
   },
 })
