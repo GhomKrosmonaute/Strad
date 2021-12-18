@@ -3,6 +3,7 @@ import canvas from "canvas"
 
 const listener: app.Listener<"messageReactionAdd"> = {
   event: "messageReactionAdd",
+  description: "Handle reaction for Stradivarius",
   async run(reaction, user) {
     const message = reaction.message
 
@@ -75,10 +76,11 @@ const listener: app.Listener<"messageReactionAdd"> = {
         ctx.fillText(`${member.user.tag}`, cv.width / 2, 215)
         ctx.drawImage(asset2, 82, 125, 436, 145)
 
-        return general.send(
-          "",
-          new app.MessageAttachment(cv.toBuffer(), "welcome.png")
-        )
+        return general.send({
+          attachments: [
+            new app.MessageAttachment(cv.toBuffer(), "welcome.png"),
+          ],
+        })
       }
 
       return
@@ -94,7 +96,7 @@ const listener: app.Listener<"messageReactionAdd"> = {
           "Tu ne peux pas signaler mes messages. C'est vraiment l'hôpital qui se fout de la charité !"
         )
       }
-      if (member.id === reaction.message.author.id) {
+      if (member.id === message.author.id) {
         await reaction.users.remove(member)
 
         return member.send("Tu ne peux pas signaler ton propre message.")
@@ -135,19 +137,19 @@ const listener: app.Listener<"messageReactionAdd"> = {
         }, 30000)
       }
 
-      const reportedMessage = reaction.message.cleanContent
+      const reportedMessage = message.cleanContent
 
-      return app
-        .getChannel(reaction, "log")
-        .send(
+      return app.getChannel(reaction, "log").send({
+        embeds: [
           new app.MessageEmbed()
             .setTitle("Message signalé")
             .setDescription(`Un nouveau message a été signalé par ${user}.`)
             .setColor(app.WARNING)
             .addField("Contenu", reportedMessage, true)
-            .addField("Localisation", reaction.message.channel, true)
-            .addField("Lien direct", reaction.message.url, true)
-        )
+            .addField("Localisation", message.channel.toString(), true)
+            .addField("Lien direct", message.url, true),
+        ],
+      })
     }
   },
 }

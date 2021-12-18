@@ -1,9 +1,10 @@
 import * as app from "../app"
 
-const listener: app.Listener<"message"> = {
-  event: "message",
+const listener: app.Listener<"messageCreate"> = {
+  event: "messageCreate",
+  description: "Handle messages for Stradivarius",
   async run(message) {
-    if (message.type === "PINS_ADD") return message.delete()
+    if (message.type === "CHANNEL_PINNED_MESSAGE") return message.delete()
 
     if (!app.isNormalMessage(message)) return
     if (!app.isGuildMessage(message)) return
@@ -27,16 +28,16 @@ const listener: app.Listener<"message"> = {
         `${message.author}, la publicité pour les serveurs Discord est défendue sur Stradivarius.`
       )
 
-      return app
-        .getChannel(message, "log")
-        .send(
+      return app.getChannel(message, "log").send({
+        embeds: [
           new app.MessageEmbed()
             .setTitle("Tentative de publicité")
             .setDescription(
               `${message.author} a tenté de faire sa publicité dans le salon ${message.channel}.\nContenu du message : *${message.cleanContent}*`
             )
-            .setColor(app.WARNING)
-        )
+            .setColor(app.WARNING),
+        ],
+      })
     }
 
     if (app.creationChannels.includes(message.channel.id)) {

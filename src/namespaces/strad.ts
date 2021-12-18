@@ -1,10 +1,11 @@
 import * as discord from "discord.js"
-import * as emojis from "./emojis"
-import * as colors from "./colors"
-import * as core from "../app/core"
+import * as emojis from "./emojis.js"
+import * as colors from "./colors.js"
+import * as command from "../app/command.js"
+import * as core from "../app/core.js"
 
-import users, { User } from "../tables/users"
-import rewards, { Reward } from "../tables/rewards"
+import users, { User } from "../tables/users.js"
+import rewards, { Reward } from "../tables/rewards.js"
 
 export const guild = "412369732679893004"
 
@@ -90,13 +91,17 @@ export const categories = {
 }
 
 export function getReactionRole(
-  reaction: discord.MessageReaction
+  reaction: discord.MessageReaction | discord.PartialMessageReaction
 ): discord.Role | null {
   for (const type in reactionRoleMessages) {
     if (type === reaction.message.id) {
       const reactionRoleReaction =
         reactionRoleReactions[type as keyof typeof reactionRoleMessages]
-      if (reactionRoleReaction.hasOwnProperty(reaction.emoji.name)) {
+      if (
+        reactionRoleReaction.hasOwnProperty(
+          reaction.emoji.name ?? reaction.emoji.id ?? reaction.emoji.toString()
+        )
+      ) {
         const roleID =
           roles[reactionRoleReaction[reaction.emoji.name as string]]
         return reaction.message.guild?.roles.cache.get(roleID) ?? null
@@ -153,9 +158,12 @@ export async function ensureUser(member: discord.GuildMember) {
 }
 
 export async function feedback(
-  reaction: discord.MessageReaction,
+  reaction: discord.MessageReaction | discord.PartialMessageReaction,
   member: discord.GuildMember
 ) {
+  if (!command.isNormalMessage(reaction.message))
+    throw new Error("Fail occurred during feedback process")
+
   const BLOCK = emojis.emoji(reaction.client, "BLOCK")
   const UPVOTE = emojis.emoji(reaction.client, "UPVOTE")
   const DOWNVOTE = emojis.emoji(reaction.client, "DOWNVOTE")
@@ -164,16 +172,14 @@ export async function feedback(
 
   const attachment = reaction.message.attachments.first()
 
-  const isFeedbackable =
+  const isFeedbackAble =
     reaction.message.reactions.cache.filter(
-      (reaction) =>
-        reaction.emoji.id === UPVOTE.id &&
-        reaction.users.cache.some(
-          (user) => user.id === reaction.client.user?.id
-        )
+      (react) =>
+        react.emoji.id === UPVOTE.id &&
+        react.users.cache.some((user) => user.id === react.client.user?.id)
     ).size > 0
 
-  if (reaction.emoji.id === DOWNLOAD.id && isFeedbackable && attachment) {
+  if (reaction.emoji.id === DOWNLOAD.id && isFeedbackAble && attachment) {
     if (
       reaction.message.author.id === member.id ||
       !reaction.message.attachments
@@ -198,22 +204,24 @@ export async function feedback(
 
     if (!rewardData) await rewards.query.insert(reward)
 
-    return member.send(
-      new discord.MessageEmbed()
-        .setTitle(`Téléchargement de ${attachment.name}`)
-        .setDescription(
-          `En téléchargeant la création de ${reaction.message.member?.displayName}, tu as ajouté **2** ${BLOCK} sur sa prochaine récompense !`
-        )
-        .setColor(colors.DOWNLOAD)
-        .addField(`Lien de téléchargement`, attachment.proxyURL)
-    )
-  } else if (!isFeedbackable && reaction.emoji.name === ENABLE_VOTES) {
+    return member.send({
+      embeds: [
+        new discord.MessageEmbed()
+          .setTitle(`Téléchargement de ${attachment.name}`)
+          .setDescription(
+            `En téléchargeant la création de ${reaction.message.member?.displayName}, tu as ajouté **2** ${BLOCK} sur sa prochaine récompense !`
+          )
+          .setColor(colors.DOWNLOAD)
+          .addField(`Lien de téléchargement`, attachment.proxyURL),
+      ],
+    })
+  } else if (!isFeedbackAble && reaction.emoji.name === ENABLE_VOTES) {
     return reaction.users.remove(member)
   } else if (
     reaction.emoji.id === UPVOTE.id ||
     reaction.emoji.id === DOWNVOTE.id
   ) {
-    if (reaction.message.author.id === member.id || !isFeedbackable) {
+    if (reaction.message.author?.id === member.id || !isFeedbackAble) {
       return reaction.users.remove(member)
     }
 
@@ -236,7 +244,7 @@ export async function feedback(
 
     if (!rewardData) await rewards.query.insert(reward)
   } else if (reaction.emoji.name === ENABLE_VOTES) {
-    if (member.id === reaction.message.author.id && !isFeedbackable) {
+    if (member.id === reaction.message.author.id && !isFeedbackAble) {
       await reaction.users.remove()
       await reaction.message.react(UPVOTE)
       await reaction.message.react(DOWNVOTE)

@@ -2,6 +2,7 @@ import * as app from "../app"
 
 const listener: app.Listener<"guildMemberAdd"> = {
   event: "guildMemberAdd",
+  description: "New member",
   async run(member) {
     const logs = app.getChannel(member, "log")
     const count = app.getCategory(member, "memberCount")
@@ -23,14 +24,16 @@ const listener: app.Listener<"guildMemberAdd"> = {
     count.setName(`STRADIVARIUS | ${member.guild.memberCount} MEMBRES`).catch()
 
     logs
-      .send(
-        new app.MessageEmbed()
-          .setTitle("Nouveau Membre")
-          .setDescription(
-            `**<@${member.user.id}>** vient de rejoindre le serveur !`
-          )
-          .setColor(app.NEUTRAL_BLUE)
-      )
+      .send({
+        embeds: [
+          new app.MessageEmbed()
+            .setTitle("Nouveau Membre")
+            .setDescription(
+              `**<@${member.user.id}>** vient de rejoindre le serveur !`
+            )
+            .setColor(app.NEUTRAL_BLUE),
+        ],
+      })
       .catch()
   },
 }

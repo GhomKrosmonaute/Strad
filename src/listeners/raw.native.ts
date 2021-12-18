@@ -3,6 +3,7 @@ import apiTypes from "discord-api-types/v8"
 
 const listener: app.Listener<"raw"> = {
   event: "raw",
+  description: "Weird handling of uncached messages reactions",
   async run({ d, t: type }) {
     if (type === "MESSAGE_REACTION_ADD" || type === "MESSAGE_REACTION_REMOVE") {
       const data = d as

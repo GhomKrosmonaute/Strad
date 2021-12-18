@@ -2,6 +2,7 @@ import * as app from "../app"
 
 const listener: app.Listener<"messageReactionRemove"> = {
   event: "messageReactionRemove",
+  description: "Handle reactions for reaction-role system",
   async run(reaction, user) {
     const message = reaction.message
 
