@@ -1,4 +1,4 @@
-import * as app from "../app"
+import * as app from "../app.js"
 
 export default new app.Table<{
   id: number
@@ -14,6 +14,7 @@ export default new app.Table<{
 }>({
   name: "items",
   priority: 5,
+  description: "Represent items",
   setup: (table) => {
     table.increments("id").primary()
     table.string("name")

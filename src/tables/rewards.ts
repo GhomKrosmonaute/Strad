@@ -1,4 +1,4 @@
-import * as app from "../app"
+import * as app from "../app.js"
 
 export interface Reward {
   type: "UV" | "DV" | "DL"
@@ -10,6 +10,7 @@ export interface Reward {
 
 export default new app.Table<Reward>({
   name: "rewards",
+  description: "Represent rewards",
   setup: (table) => {
     table.string("type", 2)
     table.string("message_id")

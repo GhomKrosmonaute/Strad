@@ -1,4 +1,4 @@
-import * as app from "../app"
+import * as app from "../app.js"
 
 export interface User {
   id: string
@@ -12,6 +12,7 @@ export interface User {
 export default new app.Table<User>({
   name: "users",
   priority: 5,
+  description: "Represent users",
   setup: (table) => {
     table.string("id").index().unique()
     table.string("tag")

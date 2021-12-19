@@ -1,6 +1,6 @@
-import * as app from "../app"
+import * as app from "../app.js"
 
-import items from "../tables/items"
+import items from "../tables/items.js"
 
 export default new app.Command({
   name: "shop",

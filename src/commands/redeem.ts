@@ -1,7 +1,7 @@
-import * as app from "../app"
+import * as app from "../app.js"
 
-import users from "../tables/users"
-import blocks_keys from "../tables/blocks_keys"
+import users from "../tables/users.js"
+import blocks_keys from "../tables/blocks_keys.js"
 
 export default new app.Command({
   name: "redeem",

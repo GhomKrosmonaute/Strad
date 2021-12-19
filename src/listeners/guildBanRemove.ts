@@ -1,4 +1,4 @@
-import * as app from "../app"
+import * as app from "../app.js"
 
 const listener: app.Listener<"guildBanRemove"> = {
   event: "guildBanRemove",

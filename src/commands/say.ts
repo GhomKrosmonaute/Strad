@@ -1,6 +1,6 @@
-import * as app from "../app"
+import * as app from "../app.js"
 
-import has_item from "../tables/has_item"
+import has_item from "../tables/has_item.js"
 
 export default new app.Command({
   name: "say",

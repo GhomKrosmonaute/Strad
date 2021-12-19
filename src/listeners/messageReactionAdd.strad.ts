@@ -1,4 +1,4 @@
-import * as app from "../app"
+import * as app from "../app.js"
 import canvas from "canvas"
 
 const listener: app.Listener<"messageReactionAdd"> = {

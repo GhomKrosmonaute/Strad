@@ -1,4 +1,4 @@
-import * as app from "../app"
+import * as app from "../app.js"
 
 export default new app.Table<{
   user_id: string
@@ -6,6 +6,7 @@ export default new app.Table<{
   amount: number
 }>({
   name: "has_item",
+  description: "Represent a link item-user",
   setup: (table) => {
     table
       .string("user_id")

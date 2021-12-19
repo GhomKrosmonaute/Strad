@@ -1,4 +1,4 @@
-import blocks_keys from "../tables/blocks_keys"
+import blocks_keys from "../tables/blocks_keys.js"
 
 export async function createKey(): Promise<string> {
   const key = [...Array(4)]

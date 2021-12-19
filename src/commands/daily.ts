@@ -1,7 +1,7 @@
-import * as app from "../app"
+import * as app from "../app.js"
 
-import users from "../tables/users"
-import rewards from "../tables/rewards"
+import users from "../tables/users.js"
+import rewards from "../tables/rewards.js"
 
 export default new app.Command({
   name: "daily",

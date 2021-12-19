@@ -1,7 +1,7 @@
-import * as app from "../app"
+import * as app from "../app.js"
 
-import users from "../tables/users"
-import has_item from "../tables/has_item"
+import users from "../tables/users.js"
+import has_item from "../tables/has_item.js"
 
 export default new app.Command({
   name: "rank",

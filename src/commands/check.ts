@@ -1,6 +1,6 @@
-import * as app from "../app"
+import * as app from "../app.js"
 
-import blocks_keys from "../tables/blocks_keys"
+import blocks_keys from "../tables/blocks_keys.js"
 
 export default new app.Command({
   name: "check",

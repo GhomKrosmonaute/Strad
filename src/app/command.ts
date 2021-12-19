@@ -1,5 +1,5 @@
 import discord from "discord.js"
-import API from "discord-api-types/v8"
+import API from "discord-api-types/v8.js"
 import chalk from "chalk"
 import tims from "tims"
 import path from "path"

@@ -7,7 +7,7 @@ export async function sendThenDelete(
 ) {
   return new Promise((resolve, reject) =>
     channel
-      .send(content)
+      .send(typeof content === "string" ? content : { embeds: [content] })
       .then((message) => {
         setTimeout(() => {
           message.delete().then(resolve).catch(reject)

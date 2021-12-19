@@ -1,6 +1,6 @@
-import * as app from "../app"
+import * as app from "../app.js"
 
-import users from "../tables/users"
+import users from "../tables/users.js"
 
 export default new app.Command({
   name: "top",

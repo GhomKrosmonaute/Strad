@@ -1,4 +1,4 @@
-import * as app from "../app"
+import * as app from "../app.js"
 
 export default new app.Table<{
   id: number
@@ -11,6 +11,7 @@ export default new app.Table<{
   recipient_id: string | null
 }>({
   name: "blocks_keys",
+  description: "Represent block keys",
   setup: (table) => {
     table.increments("id", { primaryKey: true })
     table.integer("key_value")
