@@ -1,6 +1,7 @@
 import * as app from "../app.js"
 
 import tims from "tims"
+import * as core from "../app/core.js"
 
 const conf = app.fetchPackageJson()
 
@@ -16,7 +17,7 @@ export default new app.Command({
     },
   ],
   async run(message) {
-    const embed = new app.SafeMessageEmbed()
+    const embed = new core.SafeMessageEmbed()
       .setColor()
       .setAuthor(
         `Information about ${message.client.user.tag}`,
